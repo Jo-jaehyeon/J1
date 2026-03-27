@@ -5,6 +5,7 @@
 #include "Components/EditableText.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+#include "J1ChatEntryWidget.h"
 
 
 void UJ1ChatWidget::NativeConstruct()
@@ -43,6 +44,43 @@ void UJ1ChatWidget::OnTabGuild() { SetActiveChannel(EChatChannel::Guild); }
 
 void UJ1ChatWidget::OnInputTextCommitted(const FText& Text, ETextCommit::Type CommitMethod)
 {
-	UE_LOG(LogTemp, Log, TEXT("%s"), *Text.ToString());
-	EditableText_Input->SetText(FText::GetEmpty());
+	if (CommitMethod == ETextCommit::Type::OnEnter)
+	{
+		UE_LOG(LogTemp, Log, TEXT("%s"), *Text.ToString());
+		EditableText_Input->SetText(FText::GetEmpty());
+		AppendMessageToLog(Text);
+	}
+}
+
+
+// ════════════════════════════════════
+//  채팅 관련 함수
+// ════════════════════════════════════
+void UJ1ChatWidget::AppendMessageToLog(const FText& Text)
+{
+	if (!ScrollBox_ChatLog || !ChatEntryWidgetClass) return;
+
+	UJ1ChatEntryWidget* Entry = CreateWidget<UJ1ChatEntryWidget>(GetOwningPlayer(), ChatEntryWidgetClass);
+	if (!Entry)		return;
+	
+
+	// 발신 시간 설정
+	if (UTextBlock* TimeTB = Cast<UTextBlock>(Entry->GetWidgetFromName(TEXT("Txt_Time"))))
+		TimeTB->SetText(FText::FromString(TEXT("24 : 00")));
+
+	// 발신자 이름 설정
+	if (UTextBlock* SenderTB = Cast<UTextBlock>(Entry->GetWidgetFromName(TEXT("Txt_Sender"))))
+	{
+		SenderTB->SetText(FText::FromString(TEXT("나여")));
+	}
+
+	// 내용 설정
+	if (UTextBlock* ContentTB = Cast<UTextBlock>(Entry->GetWidgetFromName(TEXT("Txt_Content"))))
+	{
+		ContentTB->SetText(Text);
+	}
+
+
+	ScrollBox_ChatLog->AddChild(Entry);
+	ScrollBox_ChatLog->ScrollToEnd();
 }

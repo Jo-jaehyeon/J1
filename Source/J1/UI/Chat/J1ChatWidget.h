@@ -13,6 +13,7 @@ class UScrollBox;
 class UTextBlock;
 class UEditableText;
 class UButton;
+class UJ1ChatEntryWidget;
 
 UCLASS()
 class J1_API UJ1ChatWidget : public UUserWidget
@@ -23,6 +24,41 @@ class J1_API UJ1ChatWidget : public UUserWidget
 protected:
     virtual void NativeConstruct() override;
     virtual void NativeDestruct() override;
+
+
+    // ════════════════════════════════════
+    //  블루프린트 호출 함수
+    // ════════════════════════════════════
+    UFUNCTION(BlueprintCallable, Category = "Chat")
+    void SetActiveChannel(EChatChannel Channel);
+
+private:
+    // ════════════════════════════════════
+    //  위젯 바인딩 함수
+    // ════════════════════════════════════
+    UFUNCTION() void OnTabAll();
+    UFUNCTION() void OnTabSystem();
+    UFUNCTION() void OnTabWhisper();
+    UFUNCTION() void OnTabParty();
+    UFUNCTION() void OnTabGuild();
+
+    UFUNCTION() 
+    void OnInputTextCommitted(const FText& Text, ETextCommit::Type CommitMethod);
+
+    // ════════════════════════════════════
+    //  채팅 관련 함수
+    // ════════════════════════════════════
+    void AppendMessageToLog(const FText& Text);
+
+public:
+    // ════════════════════════════════════
+    //  채팅 UI Setting
+    // ════════════════════════════════════
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Chat|Settings")
+    TSubclassOf<UJ1ChatEntryWidget> ChatEntryWidgetClass;
+
+private:
+    EChatChannel ActiveChannel = EChatChannel::All;
 
 public:
     // ════════════════════════════════════
@@ -54,9 +90,9 @@ public:
     UButton* Tab_System;
 
 
-    // ════════════════════════════════════════
+    // ════════════════════════════════════
     //  채널 색상
-    // ════════════════════════════════════════
+    // ════════════════════════════════════
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Chat|Colors")
     FLinearColor Color_All = FLinearColor(0.63f, 0.78f, 1.00f, 1.0f);

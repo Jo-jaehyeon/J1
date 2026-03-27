@@ -24,6 +24,31 @@ protected:
     virtual void NativeConstruct() override;
     virtual void NativeDestruct() override;
 
+
+    // ════════════════════════════════════
+    //  블루프린트 호출 함수
+    // ════════════════════════════════════
+    UFUNCTION(BlueprintCallable, Category = "Chat")
+    void SetActiveChannel(EChatChannel Channel);
+
+private:
+    // ════════════════════════════════════
+    //  위젯 바인딩 함수
+    // ════════════════════════════════════
+    UFUNCTION() 
+    void OnTabAll();
+    UFUNCTION() 
+    void OnTabSystem();
+    UFUNCTION() 
+    void OnTabWhisper();
+    UFUNCTION() 
+    void OnTabParty();
+    UFUNCTION() 
+    void OnTabGuild();
+
+    UFUNCTION() 
+    void OnInputTextCommitted(const FText& Text, ETextCommit::Type CommitMethod);
+
 public:
     // ════════════════════════════════════
     //  UMG 바인딩
@@ -54,9 +79,9 @@ public:
     UButton* Tab_System;
 
 
-    // ════════════════════════════════════════
+    // ════════════════════════════════════
     //  채널 색상
-    // ════════════════════════════════════════
+    // ════════════════════════════════════
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Chat|Colors")
     FLinearColor Color_All = FLinearColor(0.63f, 0.78f, 1.00f, 1.0f);
@@ -72,4 +97,8 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Chat|Colors")
     FLinearColor Color_System = FLinearColor(0.91f, 0.63f, 0.13f, 1.0f);
+
+
+private:
+    EChatChannel ActiveChannel = EChatChannel::All;
 };

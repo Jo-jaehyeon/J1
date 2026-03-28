@@ -14,7 +14,7 @@ public class J1 : ModuleRules
             "UMG", "SlateCore", 
             "Sockets", "Networking" });
 
-		PrivateDependencyModuleNames.AddRange(new string[] { "ProtobufCore" });
+		PrivateDependencyModuleNames.AddRange(new string[] { "ThirdParty" });
 
         PrivateIncludePaths.AddRange(new string[]
 {

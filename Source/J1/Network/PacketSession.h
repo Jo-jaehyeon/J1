@@ -20,6 +20,8 @@ public:
 	void Connect(std::string host, int port);
 	void Disconnect();
 
+	asio::io_context& GetIoContext() { return *_io_context; };
+
 private:
 	void OnConnect(const boost::system::error_code& err);
 
@@ -27,4 +29,5 @@ private:
 	asio::io_context* _io_context;
 	tcp::socket _socket;
 	UGameInstance* GameInstance;
+	TSharedPtr<class NetworkWorker> NetworkThread;
 };

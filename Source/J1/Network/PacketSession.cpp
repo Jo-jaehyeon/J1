@@ -1,4 +1,5 @@
-#include "J1PacketSession.h"
+#include "PacketSession.h"
+#include "NetworkWorker.h"
 
 PacketSession::PacketSession(asio::io_context* io_context)
 	: _socket(*io_context)
@@ -12,7 +13,7 @@ PacketSession::~PacketSession()
 
 void PacketSession::Run()
 {
-
+	NetworkThread = MakeShared<NetworkWorker>(AsShared());
 }
 
 void PacketSession::Connect(std::string host, int port)

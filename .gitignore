@@ -91,7 +91,7 @@ Plugins/**/Binaries/*
 Plugins/**/Intermediate/*
 
 # Added Library
-Source/ProtobufCore
+Source/ThirdParty/Include
 
 # Still in development(Blueprint)
 Content/Maps

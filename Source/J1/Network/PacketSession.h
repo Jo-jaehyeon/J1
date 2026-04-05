@@ -4,7 +4,6 @@
 
 #include "J1.h"
 
-
 /**
  *
  */
@@ -15,19 +14,36 @@ public:
 	PacketSession(asio::io_context* io_context);
 	~PacketSession();
 
+	asio::io_context& GetIoContext() { return *_io_context; };
+	UGameInstance* GetGameInstance() { return GameInstance; }
 
 	void Run();
 	void Connect(std::string host, int port);
 	void Disconnect();
 
-	asio::io_context& GetIoContext() { return *_io_context; };
+	void AsyncRead();
+
+	void SendPacket(asio::mutable_buffer& buffer)
+	{
+		AsyncWrite(buffer);
+	}
 
 private:
+	void AsyncWrite(asio::mutable_buffer& buffer);
+
 	void OnConnect(const boost::system::error_code& err);
+	void OnRead(const boost::system::error_code& err, size_t size);
+	void OnWrite(const boost::system::error_code& err, size_t size);
+
+	// PacketHeader를 읽고 패킷 구분
+	void HandlePacket(char* ptr, size_t size);
 
 private:
 	asio::io_context* _io_context;
 	tcp::socket _socket;
 	UGameInstance* GameInstance;
 	TSharedPtr<class NetworkWorker> NetworkThread;
+
+	static const int RecvBufferSize = 1024;
+	char _recvBuffer[RecvBufferSize];
 };

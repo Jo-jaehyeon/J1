@@ -24,3 +24,15 @@ void UJ1GameInstance::DisconnectFromGameServer()
 	GameSession->GetIoContext().stop();
 	GameSession = nullptr;
 }
+
+void UJ1GameInstance::SendPacket(asio::mutable_buffer& buffer)
+{
+	if (GameSession.IsValid())
+	{
+		GameSession->SendPacket(buffer);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("GameSession is not valid!!"));
+	}
+}

@@ -48,7 +48,8 @@ private:
     // ════════════════════════════════════
     //  채팅 관련 함수
     // ════════════════════════════════════
-    void AppendMessageToLog(const FText& Text);
+    void SendText(const FText& Text);
+    void OnChatReceived(const FString& Time, const FString& Sender, const FString& Message);
 
 public:
     // ════════════════════════════════════

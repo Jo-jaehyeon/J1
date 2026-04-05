@@ -15,6 +15,7 @@ public:
 	~PacketSession();
 
 	asio::io_context& GetIoContext() { return *_io_context; };
+	UGameInstance* GetGameInstance() { return GameInstance; }
 
 	void Run();
 	void Connect(std::string host, int port);
@@ -40,6 +41,7 @@ private:
 private:
 	asio::io_context* _io_context;
 	tcp::socket _socket;
+	UGameInstance* GameInstance;
 	TSharedPtr<class NetworkWorker> NetworkThread;
 
 	static const int RecvBufferSize = 1024;

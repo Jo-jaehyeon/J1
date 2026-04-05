@@ -7,6 +7,8 @@
 #include "J1.h"
 #include "J1GameInstance.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnChatReceived, const FString&, const FString&, const FString&);
+
 UCLASS()
 class J1_API UJ1GameInstance : public UGameInstance
 {
@@ -24,4 +26,9 @@ public:
 
 private:
 	SessionPtr GameSession;
+
+
+public:
+	// Delegate
+	FOnChatReceived OnChatReceived;
 };

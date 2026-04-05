@@ -9,6 +9,7 @@ PacketSession::PacketSession(asio::io_context* io_context)
 {
 	memset(_recvBuffer, 0, RecvBufferSize);
 	ChatPktHandler::Init();
+	GameInstance = GWorld->GetGameInstance();
 }
 
 PacketSession::~PacketSession()

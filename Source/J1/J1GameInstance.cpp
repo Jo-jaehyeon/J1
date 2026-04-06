@@ -4,6 +4,16 @@
 #include "J1GameInstance.h"
 #include "PacketSession.h"
 
+void UJ1GameInstance::Shutdown()
+{
+	RequeseDisconnect();
+
+	// 패킷을 보낼 수 있는 시간 벌기
+	FPlatformProcess::Sleep(2.0f);
+	
+	Super::Shutdown();
+}
+
 // GameServer
 void UJ1GameInstance::ConnectToGameServer()
 {
@@ -28,6 +38,7 @@ void UJ1GameInstance::Disconnect()
 {
 	GameSession->GetIoContext().stop();
 	GameSession = nullptr;
+	bLeaveConfirmed = true;
 }
 
 void UJ1GameInstance::SendPacket(asio::mutable_buffer& buffer)

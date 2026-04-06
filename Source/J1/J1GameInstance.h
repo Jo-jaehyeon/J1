@@ -20,7 +20,9 @@ public:
 	void ConnectToGameServer();
 
 	UFUNCTION(BlueprintCallable)
-	void DisconnectFromGameServer();
+	void RequeseDisconnect();
+
+	void Disconnect();
 
 	void SendPacket(asio::mutable_buffer& buffer);
 

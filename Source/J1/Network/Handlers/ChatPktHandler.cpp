@@ -19,6 +19,26 @@ bool Handle_RES_ENTER_ROOM(SessionPtr& session, Chat::RES_ENTER_ROOM& pkt)
 	return pkt.result();
 }
 
+bool Handle_RES_LEAVE_ROOM(SessionPtr& session, Chat::RES_LEAVE_ROOM& pkt)
+{
+	bool success = pkt.result();
+	if (success)
+	{
+		AsyncTask(ENamedThreads::GameThread, [session]() {
+			if (auto* GI = Cast<UJ1GameInstance>(session->GetGameInstance()))
+			{
+				GI->Disconnect();
+			}
+			});
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to Leave Chat Room"));
+	}
+
+	return true;
+}
+
 bool Handle_RES_CHAT(SessionPtr& session, Chat::RES_CHAT& pkt)
 {
 	

@@ -11,31 +11,39 @@ bool Handle_INVALID(SessionPtr& session, boost::asio::mutable_buffer& buffer, in
 
 bool Handle_RES_ENTER_ROOM(SessionPtr& session, Chat::RES_ENTER_ROOM& pkt)
 {
-	if(pkt.result())
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Enter ChatRoom Success~")));
-	else
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Enter ChatRoom Failed~")));
+	bool success = pkt.result();
+	int playerId = pkt.player_id();
+	AsyncTask(ENamedThreads::GameThread, [success, session, playerId]() {
+		if (success)
+		{
+			session->SetPlayerId(playerId);
+			UE_LOG(LogTemp, Log, TEXT("Enter ChatRoom Success~"));
+		}
+		else
+			UE_LOG(LogTemp, Error, TEXT("Failed to Leave Chat Room"));
+	});
 	
-	return pkt.result();
+	return true;
 }
 
 bool Handle_RES_LEAVE_ROOM(SessionPtr& session, Chat::RES_LEAVE_ROOM& pkt)
 {
 	bool success = pkt.result();
-	if (success)
-	{
-		AsyncTask(ENamedThreads::GameThread, [session]() {
+	AsyncTask(ENamedThreads::GameThread, [success, session]() {
+		if (success)
+		{
 			if (auto* GI = Cast<UJ1GameInstance>(session->GetGameInstance()))
 			{
 				GI->Disconnect();
 			}
-			});
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to Leave Chat Room"));
-	}
-
+			UE_LOG(LogTemp, Log, TEXT("Successfully end the chat"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to Leave Chat Room"));
+		}
+	});
+	
 	return true;
 }
 

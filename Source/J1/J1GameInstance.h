@@ -14,6 +14,8 @@ class J1_API UJ1GameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 
+public:
+	virtual void Shutdown() override;
 	// GameServer
 public:
 	UFUNCTION(BlueprintCallable)
@@ -28,7 +30,7 @@ public:
 
 private:
 	SessionPtr GameSession;
-
+	bool bLeaveConfirmed = false;
 
 public:
 	// Delegate

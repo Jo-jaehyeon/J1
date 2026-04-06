@@ -37,7 +37,7 @@ void PacketSession::RequestDisconnect()
 {
 	// Leave Room Pkt ¹ß¼Û
 	Chat::REQ_LEAVE_ROOM pkt;
-	pkt.set_player_id(0);
+	pkt.set_player_id(_player_id);
 
 	SEND_PACKET(Chat::PacketType::PKT_REQ_LEAVE_ROOM, pkt);
 }

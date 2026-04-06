@@ -19,7 +19,7 @@ public:
 
 	void Run();
 	void Connect(std::string host, int port);
-	void Disconnect();
+	void RequestDisconnect();
 
 	void AsyncRead();
 

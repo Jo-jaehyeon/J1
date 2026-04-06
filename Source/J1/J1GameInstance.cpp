@@ -19,8 +19,13 @@ void UJ1GameInstance::ConnectToGameServer()
 	
 }
 
-void UJ1GameInstance::DisconnectFromGameServer()
+void UJ1GameInstance::RequeseDisconnect()
 {	
+	GameSession->RequestDisconnect();
+}
+
+void UJ1GameInstance::Disconnect()
+{
 	GameSession->GetIoContext().stop();
 	GameSession = nullptr;
 }

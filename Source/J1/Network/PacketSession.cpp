@@ -33,9 +33,13 @@ void PacketSession::Connect(std::string host, int port)
 	);
 }
 
-void PacketSession::Disconnect()
+void PacketSession::RequestDisconnect()
 {
+	// Leave Room Pkt ¹ß¼Û
+	Chat::REQ_LEAVE_ROOM pkt;
+	pkt.set_player_id(0);
 
+	SEND_PACKET(Chat::PacketType::PKT_REQ_LEAVE_ROOM, pkt);
 }
 
 void PacketSession::OnConnect(const boost::system::error_code& err)
@@ -47,7 +51,7 @@ void PacketSession::OnConnect(const boost::system::error_code& err)
 		Chat::REQ_ENTER_ROOM pkt;
 		pkt.set_name("admin");
 		
-		SEND_PACKET(Chat::MessageCode::PKT_REQ_ENTER_ROOM, pkt);
+		SEND_PACKET(Chat::PacketType::PKT_REQ_ENTER_ROOM, pkt);
 		
 		AsyncRead();
 	}

@@ -6,7 +6,7 @@
 #include "J1ChatTypes.h"
 #include "J1ChatWidget.generated.h"
 
-/**
+/*
  *      Forward Declaration
  */
 class UScrollBox;
@@ -20,7 +20,6 @@ class J1_API UJ1ChatWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	
-
 protected:
     virtual void NativeConstruct() override;
     virtual void NativeDestruct() override;

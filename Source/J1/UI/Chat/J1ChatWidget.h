@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Blueprint/UserWidget.h"
-#include "J1ChatTypes.h"
+#include "J1EnumTypes.h"
 #include "J1ChatWidget.generated.h"
 
 /*
@@ -65,29 +65,14 @@ public:
     //  UMG 바인딩
     // ════════════════════════════════════
 
-    UPROPERTY(meta = (BindWidget))
-    UScrollBox* ScrollBox_ChatLog;
-
-    UPROPERTY(meta = (BindWidget))
-    UTextBlock* Txt_ActiveChannel;
-
-    UPROPERTY(meta = (BindWidget))
-    UEditableText* EditableText_Input;
-
-    UPROPERTY(meta = (BindWidget))
-    UButton* Tab_All;
-
-    UPROPERTY(meta = (BindWidget))
-    UButton* Tab_Party;
-
-    UPROPERTY(meta = (BindWidget))
-    UButton* Tab_Guild;
-
-    UPROPERTY(meta = (BindWidget))
-    UButton* Tab_Whisper;
-
-    UPROPERTY(meta = (BindWidget))
-    UButton* Tab_System;
+    UPROPERTY(meta = (BindWidget))  UScrollBox* ScrollBox_ChatLog;
+    UPROPERTY(meta = (BindWidget))  UTextBlock* Txt_ActiveChannel;
+    UPROPERTY(meta = (BindWidget))  UEditableText* EditableText_Input;
+    UPROPERTY(meta = (BindWidget))  UButton* Tab_All;
+    UPROPERTY(meta = (BindWidget))  UButton* Tab_Party;
+    UPROPERTY(meta = (BindWidget))  UButton* Tab_Guild;
+    UPROPERTY(meta = (BindWidget))  UButton* Tab_Whisper;
+    UPROPERTY(meta = (BindWidget))  UButton* Tab_System;
 
 
     // ════════════════════════════════════

@@ -6,7 +6,7 @@
 
 void UJ1GameInstance::Shutdown()
 {
-	RequeseDisconnect();
+	//RequeseDisconnect();
 
 	// 패킷을 보낼 수 있는 시간 벌기
 	FPlatformProcess::Sleep(2.0f);
@@ -24,7 +24,7 @@ void UJ1GameInstance::ConnectToGameServer()
 	// TODO : 로그인 서버 구현 시 아래 제거
 	GameSession = MakeShared<PacketSession>(io_context);
 
-	GameSession->Connect(std::string("127.0.0.1"), 4242);
+	GameSession->Connect(std::string("127.0.0.1"), 9000);
 	GameSession->Run();
 	
 }

@@ -1,6 +1,7 @@
-#include "PacketSession.h"
+ï»¿#include "PacketSession.h"
 #include "NetworkWorker.h"
 #include "Handlers/ChatPktHandler.h"
+#include "Handlers/LoginPktHandler.h"
 #include "../J1GameInstance.h"
 
 PacketSession::PacketSession(asio::io_context* io_context)
@@ -9,6 +10,7 @@ PacketSession::PacketSession(asio::io_context* io_context)
 {
 	memset(_recvBuffer, 0, RecvBufferSize);
 	ChatPktHandler::Init();
+	LoginPktHandler::Init();
 	GameInstance = GWorld->GetGameInstance();
 }
 
@@ -35,7 +37,7 @@ void PacketSession::Connect(std::string host, int port)
 
 void PacketSession::RequestDisconnect()
 {
-	// Leave Room Pkt ¹ß¼Û
+	// Leave Room Pkt ë°œì†¡
 	Chat::REQ_LEAVE_ROOM pkt;
 	pkt.set_player_id(_player_id);
 
@@ -47,7 +49,7 @@ void PacketSession::OnConnect(const boost::system::error_code& err)
 	if (!err)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Connection Success~")));
-		// Enter Room Pkt ¹ß¼Û
+		// Enter Room Pkt ë°œì†¡
 		Chat::REQ_ENTER_ROOM pkt;
 		pkt.set_name("admin");
 		
@@ -133,5 +135,6 @@ void PacketSession::HandlePacket(char* ptr, size_t size)
 	}
 
 	SessionPtr session = this->AsShared();
-	ChatPktHandler::HandlePacket(session, header, ptr, size);
+	//ChatPktHandler::HandlePacket(session, header, ptr, size);
+	LoginPktHandler::HandlePacket(session, header, ptr, size);
 }

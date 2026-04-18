@@ -1,13 +1,15 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "J1.h"
+#include "J1EnumTypes.h"
 #include "J1GameInstance.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnChatReceived, const FString&, const FString&, const FString&);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnLoginResult, ELoginMode, bool);
 
 UCLASS()
 class J1_API UJ1GameInstance : public UGameInstance
@@ -35,4 +37,5 @@ private:
 public:
 	// Delegate
 	FOnChatReceived OnChatReceived;
+	FOnLoginResult OnLoginResult;
 };

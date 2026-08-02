@@ -86,6 +86,7 @@ Build/Android/res/*
 !Build/Android/res/*/
 Build/Android/res/*/*
 !Build/Android/res/*/*.png
+
 # Ignore plugins binaries on deep subfolders
 Plugins/**/Binaries/*
 Plugins/**/Intermediate/*
@@ -95,3 +96,6 @@ Source/ThirdParty/Include
 
 # Still in development(Blueprint)
 Content/Maps
+
+# TempAsset
+Content/ParagonGreystone

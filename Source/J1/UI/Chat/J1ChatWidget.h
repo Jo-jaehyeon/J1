@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Blueprint/UserWidget.h"
-#include "J1EnumTypes.h"
+#include "Types/J1EnumTypes.h"
 #include "J1ChatWidget.generated.h"
 
 /*

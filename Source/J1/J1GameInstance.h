@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "J1.h"
-#include "J1EnumTypes.h"
+#include "Types/J1EnumTypes.h"
 #include "J1GameInstance.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnChatReceived, const FString&, const FString&, const FString&);

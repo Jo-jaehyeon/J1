@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "J1EnumTypes.h"
+#include "Types/J1EnumTypes.h"
 #include "J1LoginWidget.generated.h"
 
 /*
@@ -52,14 +52,14 @@ public:
     // ════════════════════════════════════
     //  UMG 바인딩
     // ════════════════════════════════════
-    UPROPERTY(meta = (BindWidget))  UTextBlock* Txt_Warning;
-    UPROPERTY(meta = (BindWidget))  UEditableTextBox* Input_ID;
-    UPROPERTY(meta = (BindWidget))  UEditableTextBox* Input_PW;
-    UPROPERTY(meta = (BindWidget))  UEditableTextBox* Input_CheckPW;
-    UPROPERTY(meta = (BindWidget))  USizeBox* SizeBox_CheckPW;
-    UPROPERTY(meta = (BindWidget))  UButton* Tab_Login;
-    UPROPERTY(meta = (BindWidget))  UButton* Tab_Join;
-    UPROPERTY(meta = (BindWidget))  UButton* Tab_CheckID;
+    UPROPERTY(meta = (BindWidget))  UTextBlock*         Txt_Warning;
+    UPROPERTY(meta = (BindWidget))  UEditableTextBox*   Input_ID;
+    UPROPERTY(meta = (BindWidget))  UEditableTextBox*   Input_PW;
+    UPROPERTY(meta = (BindWidget))  UEditableTextBox*   Input_CheckPW;
+    UPROPERTY(meta = (BindWidget))  USizeBox*           SizeBox_CheckPW;
+    UPROPERTY(meta = (BindWidget))  UButton*            Tab_Login;
+    UPROPERTY(meta = (BindWidget))  UButton*            Tab_Join;
+    UPROPERTY(meta = (BindWidget))  UButton*            Tab_CheckID;
 
 private:
     bool bLoginMode = true;

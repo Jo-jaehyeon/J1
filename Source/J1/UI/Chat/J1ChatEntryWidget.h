@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Copyright Â© 2026 Jerry. All rights reserved.
 
 #pragma once
 
@@ -29,7 +29,7 @@ public:
     UPROPERTY(meta = (BindWidget))
     UTextBlock* Txt_Sender;
 
-    // ´Ğ³×ÀÓ¿¡ ¿Ã·ÁµÎ´Â Åõ¸í ¹öÆ° (Å¬¸¯ °¨Áö¿ë)
+    // ë‹‰ë„¤ì„ì— ì˜¬ë ¤ë‘ëŠ” íˆ¬ëª… ë²„íŠ¼ (í´ë¦­ ê°ì§€ìš©)
     UPROPERTY(meta = (BindWidgetOptional))
     UButton* Btn_Sender;
 

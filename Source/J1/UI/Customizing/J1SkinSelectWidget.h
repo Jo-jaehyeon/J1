@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Copyright © 2026 Jerry. All rights reserved.
 
 #pragma once
 
@@ -49,7 +49,7 @@ private:
 
 protected:
 	// ════════════════════════════════════
-	//  UMG 바인딩
+	//				UMG 바인딩
 	// ════════════════════════════════════
 	UPROPERTY(meta = (BindWidget)) UButton*		Btn_Prev;
 	UPROPERTY(meta = (BindWidget)) UButton*		Btn_Next;

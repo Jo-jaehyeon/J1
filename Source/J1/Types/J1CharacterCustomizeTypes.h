@@ -11,7 +11,7 @@ enum class ECharacterClass : uint8
 {
     Warrior   UMETA(DisplayName = "전사"),
     Archer    UMETA(DisplayName = "궁수"),
-    Rogue     UMETA(DisplayName = "도적"),
+    Assassin     UMETA(DisplayName = "도적"),
 };
 
 

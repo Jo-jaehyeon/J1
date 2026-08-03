@@ -41,7 +41,7 @@ private:
     // 클래스 버튼 콜백
     UFUNCTION() void OnWarriorClicked() { ApplyClass(ECharacterClass::Warrior); };
     UFUNCTION() void OnArcherClicked()  { ApplyClass(ECharacterClass::Archer); };
-    UFUNCTION() void OnRogueClicked()   { ApplyClass(ECharacterClass::Rogue); };
+    UFUNCTION() void OnAssassinClicked()   { ApplyClass(ECharacterClass::Assassin); };
 
     // 스킨 피커 델리게이트 콜백
     UFUNCTION() void OnSkinChanged(ESkinSlot SkinSlot, FSkinEntry NewSkin);
@@ -56,7 +56,7 @@ protected:
     // ════════════════════════════════════
     UPROPERTY(meta = (BindWidget)) UButton* Btn_Warrior;
     UPROPERTY(meta = (BindWidget)) UButton* Btn_Archer;
-    UPROPERTY(meta = (BindWidget)) UButton* Btn_Rogue;
+    UPROPERTY(meta = (BindWidget)) UButton* Btn_Assassin;
 
     UPROPERTY(meta = (BindWidget)) UJ1SkinSelectWidget* WBP_SkinSelect_Upper;
     UPROPERTY(meta = (BindWidget)) UJ1SkinSelectWidget* WBP_SkinSelect_Lower;

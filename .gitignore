@@ -45,6 +45,8 @@
 # Precompiled Assets
 SourceArt/**/*.png
 SourceArt/**/*.tga
+Content/Asset/
+Sound/
 
 # Binary Files
 Binaries/*
@@ -96,6 +98,3 @@ Source/ThirdParty/Include
 
 # Still in development(Blueprint)
 Content/Maps
-
-# TempAsset
-Content/ParagonGreystone

@@ -12,6 +12,8 @@
  */
 class UButton;
 class UEditableTextBox;
+class UTextBlock;
+class UOverlay;
 class UJ1SkinSelectWidget;
 class UDataTable;
 class AJ1CustomizePreviewActor;
@@ -49,6 +51,8 @@ private:
     // 최종 버튼 콜백
     UFUNCTION() void OnConfirmClicked();
     UFUNCTION() void OnBackClicked();
+    UFUNCTION() void OnCreateClicked();
+    UFUNCTION() void OnCancleClicked();
 
 protected:
     // ════════════════════════════════════
@@ -62,16 +66,22 @@ protected:
     UPROPERTY(meta = (BindWidget)) UJ1SkinSelectWidget* WBP_SkinSelect_Lower;
     UPROPERTY(meta = (BindWidget)) UJ1SkinSelectWidget* WBP_SkinSelect_Weapon;
 
-    UPROPERTY(meta = (BindWidget)) UEditableTextBox* EditableText_Nickname;
-    UPROPERTY(meta = (BindWidget)) UButton* Btn_Confirm;
-    UPROPERTY(meta = (BindWidget)) UButton* Btn_Back;
+    UPROPERTY(meta = (BindWidget)) UEditableTextBox*    EditableText_Nickname;
+    UPROPERTY(meta = (BindWidget)) UButton*             Btn_Confirm;
+    UPROPERTY(meta = (BindWidget)) UButton*             Btn_Back;
+    UPROPERTY(meta = (BindWidget)) UTextBlock*          Txt_Notice;
+
+    UPROPERTY(meta = (BindWidget)) UOverlay*            Widget_PopUp;
+    UPROPERTY(meta = (BindWidget)) UTextBlock*          Txt_Check;
+    UPROPERTY(meta = (BindWidget)) UButton*             Btn_Create;
+    UPROPERTY(meta = (BindWidget)) UButton*             Btn_Cancle;
 
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Customize")
     UDataTable* CharacterDataTable;
 
     /** 씬에 배치된 프리뷰 액터 */
-    //UPROPERTY(BlueprintReadWrite, Category = "Customize")
+    UPROPERTY(BlueprintReadWrite, Category = "Customize")
     AJ1CustomizePreviewActor* PreviewActor;
 
 private:

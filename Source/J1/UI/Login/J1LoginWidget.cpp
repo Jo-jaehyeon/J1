@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Copyright © 2026 Jerry. All rights reserved.
 
 #include "UI/Login/J1LoginWidget.h"
 #include "Components/EditableTextBox.h"
@@ -6,6 +6,7 @@
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Protocol/LoginProtocol.pb.h"
+#include "Kismet/GameplayStatics.h"
 #include "J1GameInstance.h"
 
 void UJ1LoginWidget::NativeConstruct()
@@ -155,6 +156,8 @@ void UJ1LoginWidget::OnResultLogin(ELoginMode loginMode, bool result)
 		if (result)
 		{
 			// TODO	: 게임 접속 시도
+
+			UGameplayStatics::OpenLevel(GetWorld(), FName("L_Customize"));
 		}
 		break;
 	case ELoginMode::CheckId:

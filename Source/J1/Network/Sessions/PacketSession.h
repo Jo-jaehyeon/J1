@@ -10,7 +10,6 @@
 class J1_API PacketSession : public TSharedFromThis<PacketSession>
 {
 public:
-	PacketSession() : _socket(nullptr) {}
 	PacketSession(asio::io_context* io_context);
 	~PacketSession();
 
@@ -20,7 +19,7 @@ public:
 
 	void Run();
 	void Connect(std::string host, int port);
-	void RequestDisconnect();
+	virtual void RequestDisconnect() = 0;
 
 	void AsyncRead();
 
@@ -32,14 +31,18 @@ public:
 private:
 	void AsyncWrite(asio::mutable_buffer& buffer);
 
-	void OnConnect(const boost::system::error_code& err);
+	virtual void OnConnect(const boost::system::error_code& err) = 0;
 	void OnRead(const boost::system::error_code& err, size_t size);
 	void OnWrite(const boost::system::error_code& err, size_t size);
 
 	// PacketHeader를 읽고 패킷 구분
 	void HandlePacket(char* ptr, size_t size);
 
-private:
+protected:
+	// 자식 세션에서 목적에 맞는 핸들러에게 발송
+	virtual void DispatchPacket(SessionPtr session, PacketHeader& header, char* ptr, size_t size) = 0;
+
+protected:
 	asio::io_context* _io_context;
 	tcp::socket _socket;
 	UGameInstance* GameInstance;

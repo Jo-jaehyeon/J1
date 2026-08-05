@@ -1,7 +1,5 @@
 ﻿#include "PacketSession.h"
 #include "NetworkWorker.h"
-#include "Handlers/ChatPktHandler.h"
-#include "Handlers/LoginPktHandler.h"
 #include "../J1GameInstance.h"
 
 PacketSession::PacketSession(asio::io_context* io_context)
@@ -9,8 +7,6 @@ PacketSession::PacketSession(asio::io_context* io_context)
 	, _io_context(io_context)
 {
 	memset(_recvBuffer, 0, RecvBufferSize);
-	ChatPktHandler::Init();
-	LoginPktHandler::Init();
 	GameInstance = GWorld->GetGameInstance();
 }
 
@@ -33,34 +29,6 @@ void PacketSession::Connect(std::string host, int port)
 			boost::asio::placeholders::error
 		)
 	);
-}
-
-void PacketSession::RequestDisconnect()
-{
-	// Leave Room Pkt 발송
-	Chat::REQ_LEAVE_ROOM pkt;
-	pkt.set_player_id(_player_id);
-
-	SEND_PACKET(Chat::PacketType::PKT_REQ_LEAVE_ROOM, pkt);
-}
-
-void PacketSession::OnConnect(const boost::system::error_code& err)
-{
-	if (!err)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Connection Success~")));
-		// Enter Room Pkt 발송
-		Chat::REQ_ENTER_ROOM pkt;
-		pkt.set_name("admin");
-		
-		SEND_PACKET(Chat::PacketType::PKT_REQ_ENTER_ROOM, pkt);
-		
-		AsyncRead();
-	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Connect Failed")));
-	}
 }
 
 void PacketSession::AsyncRead()
@@ -135,6 +103,8 @@ void PacketSession::HandlePacket(char* ptr, size_t size)
 	}
 
 	SessionPtr session = this->AsShared();
-	//ChatPktHandler::HandlePacket(session, header, ptr, size);
-	LoginPktHandler::HandlePacket(session, header, ptr, size);
+
+
+	// 자식 클래스에서 처리
+	DispatchPacket(session, header, ptr, size);
 }

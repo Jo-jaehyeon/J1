@@ -32,7 +32,26 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Customize")
 	void ApplyClass(const FCharacterSkinBaseData& ClassData);
 
-	/** 스킨 변경: 슬롯별 머터리얼만 교체 */
+	/** 스킨 변경 */
 	UFUNCTION(BlueprintCallable, Category = "Customize")
-	void ApplySkin(ESkinSlot SkinSlot, FSkinEntry NewSkin);
+	void ApplySkin(ESkinSlot SkinSlot, const FSkinEntry& SkinData);
+
+	/** 슬롯 → 머터리얼 인덱스 매핑 */
+	UFUNCTION(BlueprintPure, Category = "Customization")
+	static int32 GetMaterialIndexForSlot(ESkinSlot Slot);
+
+
+private:
+	/** 비동기 로드 후 메시 적용 */
+	void OnSkeletalMeshLoaded(TSoftObjectPtr<USkeletalMesh> SoftMesh, TSoftClassPtr<UAnimInstance>  SoftAnim);
+
+	/** 비동기 로드 후 머터리얼 적용 */
+	void OnMaterialLoaded(TSoftObjectPtr<UMaterialInterface> SoftMat, int32 SlotIndex);
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class USpringArmComponent> CameraBoom;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UCameraComponent> FollowCamera;
 };

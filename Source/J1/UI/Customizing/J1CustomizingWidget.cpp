@@ -5,6 +5,8 @@
 #include "Character/PC/J1CustomizePreviewActor.h"
 #include "Components/Button.h"
 #include "Components/EditableTextBox.h"
+#include "Components/TextBlock.h"
+#include "Components/Overlay.h"
 #include "Engine/DataTable.h"
 #include "Kismet/GameplayStatics.h"
 #include "Internationalization/Regex.h"
@@ -22,9 +24,20 @@ void UJ1CustomizingWidget::NativeConstruct()
 	if (WBP_SkinSelect_Lower)	WBP_SkinSelect_Lower->OnSkinChanged.AddDynamic(this, &UJ1CustomizingWidget::OnSkinChanged);
 	if (WBP_SkinSelect_Weapon)	WBP_SkinSelect_Weapon->OnSkinChanged.AddDynamic(this, &UJ1CustomizingWidget::OnSkinChanged);
 
-	// 확정/캔슬 버튼 바인딩
+	// 확인/Back 버튼 바인딩
 	if (Btn_Confirm)	Btn_Confirm->OnClicked.AddDynamic(this, &UJ1CustomizingWidget::OnConfirmClicked);
 	if (Btn_Back)		Btn_Back->OnClicked.AddDynamic(this, &UJ1CustomizingWidget::OnBackClicked);
+	
+	
+	if (Txt_Notice)
+	{
+		Txt_Notice->SetColorAndOpacity(FSlateColor(FLinearColor(1.0f, 0.0f, 0.0f, 1.0f)));
+		Txt_Notice->SetVisibility(ESlateVisibility::Hidden);
+	}
+
+	// 생성/캔슬 버튼 바인딩
+	if (Btn_Create)		Btn_Create->OnClicked.AddDynamic(this, &UJ1CustomizingWidget::OnConfirmClicked);
+	if (Btn_Cancle)		Btn_Cancle->OnClicked.AddDynamic(this, &UJ1CustomizingWidget::OnBackClicked);
 
 	// 씬에서 프리뷰 액터 자동 탐색
 	if (!PreviewActor)
@@ -102,29 +115,51 @@ void UJ1CustomizingWidget::OnConfirmClicked()
 	if (!IsNicknameValid(Nickname))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[Customize] 닉네임 유효성 검사 실패: %s"), *Nickname);
-		// TODO: 별도 UI 오픈
+		Txt_Notice->SetVisibility(ESlateVisibility::Visible);
+		Txt_Notice->SetText(FText::FromString(TEXT("사용 불가능한 닉네임입니다")));
 		return;
 	}
 
 	// 중복되지 않은 닉네임인지 체크
 	// TODO : 서버파트
-
-
-	// 결과 서버 전달
-	//FCharacterCustomizeResult Result;
-	//Result.Nickname = Nickname;
-	//Result.SelectedClass = CurrentClass;
-	//Result.UpperSkinIndex = WBP_SkinSelect_Upper ? WBP_SkinSelect_Upper->GetCurrentIndex() : 0;
-	//Result.LowerSkinIndex = WBP_SkinSelect_Lower ? WBP_SkinSelect_Lower->GetCurrentIndex() : 0;
-	//Result.WeaponSkinIndex = WBP_SkinSelect_Weapon ? WBP_SkinSelect_Weapon->GetCurrentIndex() : 0;
-
-	// TODO 전달
-	
-	// UGameplayStatics::OpenLevel(GetWorld(), FName("GameMap"));
-
+	// else if()
+	// {
+	//		Txt_Notice->SetVisibility(ESlateVisibility::Visible);
+	//		Txt_Notice->SetText(FText::FromString(TEXT("누군가 사용중인 닉네임입니다.")));
+	// }
+	else
+	{
+		Txt_Check->SetText(FText::FromString(Nickname));
+		Txt_Notice->SetVisibility(ESlateVisibility::Hidden);
+		Widget_PopUp->SetVisibility(ESlateVisibility::Visible);
+	}
 }
 
 void UJ1CustomizingWidget::OnBackClicked()
 {
-	//UGameplayStatics::OpenLevel(GetWorld(), FName("MainMenuMap"));
+	UGameplayStatics::OpenLevel(GetWorld(), FName("L_Login"));
+}
+
+void UJ1CustomizingWidget::OnCreateClicked()
+{
+	// TODO
+	FString Nickname = EditableText_Nickname->GetText().ToString();
+
+	// 결과 서버 전달(별도 UI 만들 필요 존재)
+	FCharacterCustomizeResult Result;
+	Result.Nickname = Nickname;
+	Result.SelectedClass = CurrentClass;
+	Result.UpperSkinIndex = WBP_SkinSelect_Upper ? WBP_SkinSelect_Upper->GetCurrentIndex() : 0;
+	Result.LowerSkinIndex = WBP_SkinSelect_Lower ? WBP_SkinSelect_Lower->GetCurrentIndex() : 0;
+	Result.WeaponSkinIndex = WBP_SkinSelect_Weapon ? WBP_SkinSelect_Weapon->GetCurrentIndex() : 0;
+
+	// 서버 결과 전달
+
+	// TODO 캐릭 선택창으로 
+	UGameplayStatics::OpenLevel(GetWorld(), FName("L_Login"));
+}
+
+void UJ1CustomizingWidget::OnCancleClicked()
+{
+	Txt_Notice->SetVisibility(ESlateVisibility::Hidden);
 }

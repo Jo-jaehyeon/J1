@@ -18,20 +18,26 @@ class J1_API UJ1GameInstance : public UGameInstance
 
 public:
 	virtual void Shutdown() override;
-	// GameServer
+	
+	// Server
 public:
 	UFUNCTION(BlueprintCallable)
-	void ConnectToGameServer();
+	void ConnectToLoginServer();
 
 	UFUNCTION(BlueprintCallable)
-	void RequeseDisconnect();
+	void RequeseDisconnect(ESessionType sessionType);
 
-	void Disconnect();
+	void Disconnect(ESessionType sessionType);
 
-	void SendPacket(asio::mutable_buffer& buffer);
+	void SendPacket(ESessionType sessionType, asio::mutable_buffer& buffer);
 
 private:
-	SessionPtr GameSession;
+	SessionPtr FindTargetSession(ESessionType sessionType);
+
+private:
+	SessionPtr loginSession;
+	SessionPtr gameSession;
+	SessionPtr chatSession;
 	bool bLeaveConfirmed = false;
 
 public:

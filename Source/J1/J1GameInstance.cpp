@@ -15,40 +15,58 @@ void UJ1GameInstance::Shutdown()
 }
 
 // GameServer
-void UJ1GameInstance::ConnectToGameServer()
+void UJ1GameInstance::ConnectToLoginServer()
 {
 	asio::io_context* io_context = new asio::io_context;
 
-	// TODO : 로그인 서버 연결
-
-	// TODO : 로그인 서버 구현 시 아래 제거
-	GameSession = MakeShared<LoginSession>(io_context);
-
-	GameSession->Connect(std::string("127.0.0.1"), 9000);
-	GameSession->Run();
-	
+	// 로그인 서버 연결
+	loginSession = MakeShared<LoginSession>(io_context);
+	loginSession->Connect(std::string("127.0.0.1"), 9000);
+	loginSession->Run();
 }
 
-void UJ1GameInstance::RequeseDisconnect()
+void UJ1GameInstance::RequeseDisconnect(ESessionType sessionType)
 {	
-	GameSession->RequestDisconnect();
+	SessionPtr targetSession = FindTargetSession(sessionType);
+	if (targetSession.IsValid())
+		targetSession->RequestDisconnect();
 }
 
-void UJ1GameInstance::Disconnect()
+void UJ1GameInstance::Disconnect(ESessionType sessionType)
 {
-	GameSession->GetIoContext().stop();
-	GameSession = nullptr;
+	SessionPtr targetSession = FindTargetSession(sessionType);
+	if (targetSession.IsValid())
+	{
+		targetSession->GetIoContext().stop();
+		targetSession = nullptr;
+	}
 	bLeaveConfirmed = true;
 }
 
-void UJ1GameInstance::SendPacket(asio::mutable_buffer& buffer)
+void UJ1GameInstance::SendPacket(ESessionType sessionType, asio::mutable_buffer& buffer)
 {
-	if (GameSession.IsValid())
+	SessionPtr targetSession = FindTargetSession(sessionType);
+
+	if (targetSession.IsValid())
 	{
-		GameSession->SendPacket(buffer);
+		targetSession->SendPacket(buffer);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("GameSession is not valid!!"));
+		UE_LOG(LogTemp, Error, TEXT("Session is not valid!!"));
 	}
+}
+
+SessionPtr UJ1GameInstance::FindTargetSession(ESessionType sessionType)
+{
+	SessionPtr targetSession;
+
+	switch (sessionType)
+	{
+	case ESessionType::Login: targetSession = loginSession; break;
+	case ESessionType::Game:  targetSession = gameSession;  break;
+	case ESessionType::Chat:  targetSession = chatSession;  break;
+	}
+
+	return targetSession;
 }

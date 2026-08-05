@@ -76,7 +76,7 @@ void UJ1ChatWidget::SendText(const FText& Text)
 	std::string str_msg = std::string(TCHAR_TO_UTF8(*fstr_msg));
 	ChatPkt.set_message(str_msg);
 
-	SEND_PACKET(Chat::PacketType::PKT_REQ_CHAT, ChatPkt);
+	SEND_PACKET(ESessionType::Chat, Chat::PacketType::PKT_REQ_CHAT, ChatPkt);
 }
 
 // ════════════════════════════════════

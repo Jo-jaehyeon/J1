@@ -34,7 +34,7 @@ bool Handle_RES_LEAVE_ROOM(SessionPtr& session, Chat::RES_LEAVE_ROOM& pkt)
 		{
 			if (auto* GI = Cast<UJ1GameInstance>(session->GetGameInstance()))
 			{
-				GI->Disconnect();
+				GI->Disconnect(ESessionType::Chat);
 			}
 			UE_LOG(LogTemp, Log, TEXT("Successfully end the chat"));
 		}

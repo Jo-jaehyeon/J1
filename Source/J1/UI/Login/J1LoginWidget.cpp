@@ -118,7 +118,7 @@ void UJ1LoginWidget::TryLogin(FString input_id, FString input_pw)
 	LoginPkt.set_id(idString);
 	LoginPkt.set_pw(pwString);
 	
-	SEND_PACKET(Login::PacketType::PKT_REQ_LOGIN, LoginPkt);
+	SEND_PACKET(ESessionType::Login, Login::PacketType::PKT_REQ_LOGIN, LoginPkt);
 }
 
 void UJ1LoginWidget::TryCheckID(FString input_id)
@@ -128,7 +128,7 @@ void UJ1LoginWidget::TryCheckID(FString input_id)
 	std::string idString = TCHAR_TO_UTF8(*input_id);
 	CheckPkt.set_id(idString);
 
-	SEND_PACKET(Login::PacketType::PKT_REQ_CHECK_ID, CheckPkt);
+	SEND_PACKET(ESessionType::Login, Login::PacketType::PKT_REQ_CHECK_ID, CheckPkt);
 }
 
 void UJ1LoginWidget::TrySignUp(FString input_id, FString input_pw)
@@ -140,7 +140,7 @@ void UJ1LoginWidget::TrySignUp(FString input_id, FString input_pw)
 	JoinPkt.set_id(idString);
 	JoinPkt.set_pw(pwString);
 
-	SEND_PACKET(Login::PacketType::PKT_REQ_JOIN, JoinPkt);
+	SEND_PACKET(ESessionType::Login, Login::PacketType::PKT_REQ_JOIN, JoinPkt);
 }
 
 // ═════════════════════

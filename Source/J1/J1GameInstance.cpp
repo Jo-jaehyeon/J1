@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Copyright Â© 2026 Jerry. All rights reserved.
 
 
 #include "J1GameInstance.h"
@@ -8,7 +8,7 @@ void UJ1GameInstance::Shutdown()
 {
 	//RequeseDisconnect();
 
-	// ÆĞÅ¶À» º¸³¾ ¼ö ÀÖ´Â ½Ã°£ ¹ú±â
+	// íŒ¨í‚·ì„ ë³´ë‚¼ ìˆ˜ ìˆëŠ” ì‹œê°„ ë²Œê¸°
 	FPlatformProcess::Sleep(2.0f);
 	
 	Super::Shutdown();
@@ -19,9 +19,9 @@ void UJ1GameInstance::ConnectToGameServer()
 {
 	asio::io_context* io_context = new asio::io_context;
 
-	// TODO : ·Î±×ÀÎ ¼­¹ö ¿¬°á
+	// TODO : ë¡œê·¸ì¸ ì„œë²„ ì—°ê²°
 
-	// TODO : ·Î±×ÀÎ ¼­¹ö ±¸Çö ½Ã ¾Æ·¡ Á¦°Å
+	// TODO : ë¡œê·¸ì¸ ì„œë²„ êµ¬í˜„ ì‹œ ì•„ë˜ ì œê±°
 	GameSession = MakeShared<PacketSession>(io_context);
 
 	GameSession->Connect(std::string("127.0.0.1"), 9000);

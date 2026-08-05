@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+Ôªø// Copyright ¬© 2026 Jerry. All rights reserved.
 
 #pragma once
 
@@ -36,7 +36,7 @@ private:
 	void OnRead(const boost::system::error_code& err, size_t size);
 	void OnWrite(const boost::system::error_code& err, size_t size);
 
-	// PacketHeader∏¶ ¿–∞Ì ∆–≈∂ ±∏∫–
+	// PacketHeaderÎ•º ÏùΩÍ≥† Ìå®ÌÇ∑ Íµ¨Î∂Ñ
 	void HandlePacket(char* ptr, size_t size);
 
 private:

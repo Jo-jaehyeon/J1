@@ -45,6 +45,8 @@
 # Precompiled Assets
 SourceArt/**/*.png
 SourceArt/**/*.tga
+Content/Asset/
+Sound/
 
 # Binary Files
 Binaries/*
@@ -86,6 +88,7 @@ Build/Android/res/*
 !Build/Android/res/*/
 Build/Android/res/*/*
 !Build/Android/res/*/*.png
+
 # Ignore plugins binaries on deep subfolders
 Plugins/**/Binaries/*
 Plugins/**/Intermediate/*

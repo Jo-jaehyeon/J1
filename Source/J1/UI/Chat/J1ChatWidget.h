@@ -1,9 +1,9 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Copyright © 2026 Jerry. All rights reserved.
 
 #pragma once
 
 #include "Blueprint/UserWidget.h"
-#include "J1EnumTypes.h"
+#include "Types/J1EnumTypes.h"
 #include "J1ChatWidget.generated.h"
 
 /*
@@ -26,14 +26,14 @@ protected:
 
 
     // ════════════════════════════════════
-    //  블루프린트 호출 함수
+    //         블루프린트 호출 함수
     // ════════════════════════════════════
     UFUNCTION(BlueprintCallable, Category = "Chat")
     void SetActiveChannel(EChatChannel Channel);
 
 private:
     // ════════════════════════════════════
-    //  위젯 바인딩 함수
+    //            위젯 바인딩 함수
     // ════════════════════════════════════
     UFUNCTION() void OnTabAll();
     UFUNCTION() void OnTabSystem();
@@ -45,14 +45,14 @@ private:
     void OnInputTextCommitted(const FText& Text, ETextCommit::Type CommitMethod);
 
     // ════════════════════════════════════
-    //  채팅 관련 함수
+    //             채팅 관련 함수
     // ════════════════════════════════════
     void SendText(const FText& Text);
     void OnChatReceived(const FString& Time, const FString& Sender, const FString& Message);
 
 public:
     // ════════════════════════════════════
-    //  채팅 UI Setting
+    //            채팅 UI Setting
     // ════════════════════════════════════
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Chat|Settings")
     TSubclassOf<UJ1ChatEntryWidget> ChatEntryWidgetClass;
@@ -62,7 +62,7 @@ private:
 
 public:
     // ════════════════════════════════════
-    //  UMG 바인딩
+    //              UMG 바인딩
     // ════════════════════════════════════
 
     UPROPERTY(meta = (BindWidget))  UScrollBox* ScrollBox_ChatLog;
@@ -76,7 +76,7 @@ public:
 
 
     // ════════════════════════════════════
-    //  채널 색상
+    //               채널 색상
     // ════════════════════════════════════
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Chat|Colors")

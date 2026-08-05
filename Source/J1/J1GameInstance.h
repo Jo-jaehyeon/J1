@@ -1,11 +1,11 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Copyright © 2026 Jerry. All rights reserved.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "J1.h"
-#include "J1EnumTypes.h"
+#include "Types/J1EnumTypes.h"
 #include "J1GameInstance.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnChatReceived, const FString&, const FString&, const FString&);

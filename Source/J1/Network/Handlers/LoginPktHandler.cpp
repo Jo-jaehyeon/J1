@@ -1,7 +1,7 @@
 ﻿#include "LoginPktHandler.h"
 #include "J1GameInstance.h"
-#include "PacketSession.h"
-#include "J1EnumTypes.h"
+#include "Network/Sessions/PacketSession.h"
+#include "Types/J1EnumTypes.h"
 
 
 LoginHandlerFunc GLoginPacketHandler[UINT16_MAX];

@@ -2,7 +2,7 @@
 
 
 #include "J1GameInstance.h"
-#include "PacketSession.h"
+#include "Network/Sessions/LoginSession.h"
 
 void UJ1GameInstance::Shutdown()
 {
@@ -22,7 +22,7 @@ void UJ1GameInstance::ConnectToGameServer()
 	// TODO : 로그인 서버 연결
 
 	// TODO : 로그인 서버 구현 시 아래 제거
-	GameSession = MakeShared<PacketSession>(io_context);
+	GameSession = MakeShared<LoginSession>(io_context);
 
 	GameSession->Connect(std::string("127.0.0.1"), 9000);
 	GameSession->Run();

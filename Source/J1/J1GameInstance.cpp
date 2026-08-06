@@ -3,6 +3,8 @@
 
 #include "J1GameInstance.h"
 #include "Network/Sessions/LoginSession.h"
+#include "Network/Sessions/GameSession.h"
+#include "Network/Sessions/ChatSession.h"
 
 void UJ1GameInstance::Shutdown()
 {
@@ -15,17 +17,31 @@ void UJ1GameInstance::Shutdown()
 }
 
 // GameServer
-void UJ1GameInstance::ConnectToLoginServer()
+void UJ1GameInstance::ConnectToServer(ESessionType sessionType)
 {
 	asio::io_context* io_context = new asio::io_context;
 
-	// 로그인 서버 연결
-	loginSession = MakeShared<LoginSession>(io_context);
-	loginSession->Connect(std::string("127.0.0.1"), 9000);
-	loginSession->Run();
+	switch (sessionType)
+	{
+	case ESessionType::Login: 
+		loginSession = MakeShared<LoginSession>(io_context, this);
+		loginSession->Connect(std::string("127.0.0.1"), 9000); 
+		loginSession->Run();
+		break;
+	case ESessionType::Game:  
+		gameSession = MakeShared<GameSession>(io_context, this);
+		gameSession->Connect(std::string("127.0.0.1"), 9001);
+		gameSession->Run();
+		break;
+	case ESessionType::Chat:  
+		chatSession = MakeShared<ChatSession>(io_context, this);
+		chatSession->Connect(std::string("127.0.0.1"), 9002);
+		chatSession->Run();
+		break;
+	}
 }
 
-void UJ1GameInstance::RequeseDisconnect(ESessionType sessionType)
+void UJ1GameInstance::RequestDisconnect(ESessionType sessionType)
 {	
 	SessionPtr targetSession = FindTargetSession(sessionType);
 	if (targetSession.IsValid())

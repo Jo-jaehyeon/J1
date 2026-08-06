@@ -22,10 +22,10 @@ public:
 	// Server
 public:
 	UFUNCTION(BlueprintCallable)
-	void ConnectToLoginServer();
+	void ConnectToServer(ESessionType sessionType);
 
 	UFUNCTION(BlueprintCallable)
-	void RequeseDisconnect(ESessionType sessionType);
+	void RequestDisconnect(ESessionType sessionType);
 
 	void Disconnect(ESessionType sessionType);
 

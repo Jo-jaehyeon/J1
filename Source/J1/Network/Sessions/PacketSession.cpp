@@ -2,12 +2,12 @@
 #include "NetworkWorker.h"
 #include "../J1GameInstance.h"
 
-PacketSession::PacketSession(asio::io_context* io_context)
+PacketSession::PacketSession(asio::io_context* io_context, UJ1GameInstance* gameInstance)
 	: _socket(*io_context)
 	, _io_context(io_context)
+	, GameInstance(gameInstance)
 {
 	memset(_recvBuffer, 0, RecvBufferSize);
-	GameInstance = GWorld->GetGameInstance();
 }
 
 PacketSession::~PacketSession()
@@ -29,6 +29,19 @@ void PacketSession::Connect(std::string host, int port)
 			boost::asio::placeholders::error
 		)
 	);
+}
+
+void PacketSession::Disconnect()
+{
+	if (_connected.exchange(false) == false)	return;		// 이미 disconnect 처리됨
+
+	boost::system::error_code ec;
+
+	// 1. Graceful shutdown (양방향 송수신 중단을 상대방에게 알림)
+	_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+
+	// 2. 소켓 자체를 닫음 (fd 반환)
+	_socket.close(ec);
 }
 
 void PacketSession::AsyncRead()

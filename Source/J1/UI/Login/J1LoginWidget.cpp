@@ -118,7 +118,7 @@ void UJ1LoginWidget::TryLogin(FString input_id, FString input_pw)
 	LoginPkt.set_id(idString);
 	LoginPkt.set_pw(pwString);
 	
-	SEND_PACKET(ESessionType::Login, Login::PacketType::PKT_REQ_LOGIN, LoginPkt);
+	SEND_PACKET(GetGameInstance<UJ1GameInstance>(), ESessionType::Login, Login::PacketType::PKT_REQ_LOGIN, LoginPkt);
 }
 
 void UJ1LoginWidget::TryCheckID(FString input_id)
@@ -128,7 +128,7 @@ void UJ1LoginWidget::TryCheckID(FString input_id)
 	std::string idString = TCHAR_TO_UTF8(*input_id);
 	CheckPkt.set_id(idString);
 
-	SEND_PACKET(ESessionType::Login, Login::PacketType::PKT_REQ_CHECK_ID, CheckPkt);
+	SEND_PACKET(GetGameInstance<UJ1GameInstance>(), ESessionType::Login, Login::PacketType::PKT_REQ_CHECK_ID, CheckPkt);
 }
 
 void UJ1LoginWidget::TrySignUp(FString input_id, FString input_pw)
@@ -140,7 +140,7 @@ void UJ1LoginWidget::TrySignUp(FString input_id, FString input_pw)
 	JoinPkt.set_id(idString);
 	JoinPkt.set_pw(pwString);
 
-	SEND_PACKET(ESessionType::Login, Login::PacketType::PKT_REQ_JOIN, JoinPkt);
+	SEND_PACKET(GetGameInstance<UJ1GameInstance>(), ESessionType::Login, Login::PacketType::PKT_REQ_JOIN, JoinPkt);
 }
 
 // ═════════════════════
@@ -156,8 +156,17 @@ void UJ1LoginWidget::OnResultLogin(ELoginMode loginMode, bool result)
 		if (result)
 		{
 			// TODO	: 게임 접속 시도
-
-			UGameplayStatics::OpenLevel(GetWorld(), FName("L_Customize"));
+			if (auto* GI = GetGameInstance<UJ1GameInstance>())
+			{
+				//GI->ConnectToServer(ESessionType::Game);
+				GI->ConnectToServer(ESessionType::Chat);
+				GI->RequestDisconnect(ESessionType::Login);
+			}
+			else
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("GI Is Not Valid")));
+			}
+			UGameplayStatics::OpenLevel(GetWorld(), FName("Devmap"));
 		}
 		break;
 	case ELoginMode::CheckId:

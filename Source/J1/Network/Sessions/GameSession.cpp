@@ -3,8 +3,8 @@
 //#include "Handlers/GamePktHandler.h"
 #include "../../J1GameInstance.h"
 
-GameSession::GameSession(asio::io_context* io_context)
-	: PacketSession(io_context)
+GameSession::GameSession(asio::io_context* io_context, UJ1GameInstance* gameInstance)
+	: PacketSession(io_context, gameInstance)
 {
 	//GamePktHandler::Init();
 }

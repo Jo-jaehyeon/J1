@@ -11,7 +11,7 @@
 class J1_API ChatSession : public PacketSession
 {
 public:
-	ChatSession(asio::io_context* io_context);
+	ChatSession(asio::io_context* io_context, UJ1GameInstance* gameInstance);
 	~ChatSession();
 
 

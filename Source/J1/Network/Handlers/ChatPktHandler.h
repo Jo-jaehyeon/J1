@@ -6,16 +6,14 @@
 #include "J1.h"
 #endif
 
-using PacketHandlerFunc = std::function<bool(SessionPtr&, boost::asio::mutable_buffer&, int32&)>;
-extern PacketHandlerFunc GPacketHandler[UINT16_MAX];
-
+using ChatHandlerFunc = std::function<bool(SessionPtr&, boost::asio::mutable_buffer&, int32&)>;
+extern ChatHandlerFunc GChatPacketHandler[UINT16_MAX];
 
 // Custom Handler
-bool Handle_INVALID(SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset);
-bool Handle_RES_ENTER_ROOM(SessionPtr& session, Chat::RES_ENTER_ROOM& pkt);
-bool Handle_RES_LEAVE_ROOM(SessionPtr& session, Chat::RES_LEAVE_ROOM& pkt);
-bool Handle_RES_CHAT(SessionPtr& session, Chat::RES_CHAT& pkt);
-
+bool Handle_Chat_INVALID(SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset);
+bool Handle_RES_ENTER_ROOM(SessionPtr& session, Chat::RES_ENTER_ROOM&pkt);
+bool Handle_RES_LEAVE_ROOM(SessionPtr& session, Chat::RES_LEAVE_ROOM&pkt);
+bool Handle_RES_CHAT(SessionPtr& session, Chat::RES_CHAT&pkt);
 
 class ChatPktHandler
 {
@@ -23,14 +21,14 @@ public:
 	static void Init()
 	{
 		for (int32 i = 0; i < UINT16_MAX; i++)
-			GPacketHandler[i] = Handle_INVALID;
-		GPacketHandler[Chat::PacketType::PKT_RES_ENTER_ROOM] = [](SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset) {
+			GChatPacketHandler[i] = Handle_Chat_INVALID;
+		GChatPacketHandler[Chat::PacketType::PKT_RES_ENTER_ROOM] = [](SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset) {
 			return DispatchPacket<Chat::RES_ENTER_ROOM>(Handle_RES_ENTER_ROOM, session, buffer, offset);
 			};
-		GPacketHandler[Chat::PacketType::PKT_RES_LEAVE_ROOM] = [](SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset) {
+		GChatPacketHandler[Chat::PacketType::PKT_RES_LEAVE_ROOM] = [](SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset) {
 			return DispatchPacket<Chat::RES_LEAVE_ROOM>(Handle_RES_LEAVE_ROOM, session, buffer, offset);
 			};
-		GPacketHandler[Chat::PacketType::PKT_RES_CHAT] = [](SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset) {
+		GChatPacketHandler[Chat::PacketType::PKT_RES_CHAT] = [](SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset) {
 			return DispatchPacket<Chat::RES_CHAT>(Handle_RES_CHAT, session, buffer, offset);
 			};
 	}
@@ -40,17 +38,16 @@ public:
 		boost::asio::mutable_buffer buffer = boost::asio::buffer(ptr, size);
 		int offset = 4;
 
-		return GPacketHandler[header.Code](session, buffer, offset);
+		return GChatPacketHandler[header.Code](session, buffer, offset);
 	}
 
 private:
 	template<typename PacketType, typename ProcessFunc>
-	static bool DispatchPacket(ProcessFunc func, SessionPtr & session, boost::asio::mutable_buffer & buffer, int32 & offset)
+	static bool DispatchPacket(ProcessFunc func, SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset)
 	{
 		PacketType pkt;
 		if (!PacketUtil::Parse(pkt, buffer, buffer.size(), offset))
 		{
-			
 			#if UE_BUILD_DEBUG + UE_BUILD_DEVELOPMENT + UE_BUILD_TEST + UE_BUILD_SHIPPING >= 1
 				UE_LOG(LogTemp, Warning, TEXT("Failed to Handle Packet"))
 			#else

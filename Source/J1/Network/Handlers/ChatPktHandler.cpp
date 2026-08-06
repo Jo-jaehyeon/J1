@@ -2,9 +2,9 @@
 #include "J1GameInstance.h"
 #include "Network/Sessions/PacketSession.h"
 
-PacketHandlerFunc GPacketHandler[UINT16_MAX];
+ChatHandlerFunc GChatPacketHandler[UINT16_MAX];
 
-bool Handle_INVALID(SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset)
+bool Handle_Chat_INVALID(SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset)
 {
 	return false;
 }

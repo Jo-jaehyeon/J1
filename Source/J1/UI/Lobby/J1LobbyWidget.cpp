@@ -33,6 +33,6 @@ void UJ1LobbyWidget::OnNotice(FString text)
 	SizeBox_Notice->SetVisibility(ESlateVisibility::Visible);
 	Txt_Notice->SetText(FText::FromString(text));
 
-	// TODO 타이머로 n초 뒤 닫히게
+	// TODO 타이머로 n초 뒤 popup 닫히게
 	
 }

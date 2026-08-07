@@ -20,6 +20,7 @@ void GameSession::RequestDisconnect()
 	//pkt.set_player_id(_player_id);
 	//
 	//SEND_PACKET(Chat::PacketType::PKT_REQ_LEAVE_ROOM, pkt);
+	PacketSession::Disconnect();
 }
 
 void GameSession::OnConnect(const boost::system::error_code& err)

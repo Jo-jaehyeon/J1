@@ -1,6 +1,7 @@
 ﻿#include "GamePktHandler.h"
 #include "J1GameInstance.h"
 #include "Network/Sessions/PacketSession.h"
+#include "Kismet/GameplayStatics.h"
 
 GameHandlerFunc GGamePacketHandler[UINT16_MAX];
 
@@ -15,10 +16,16 @@ bool Handle_RES_CHARACTER_LIST(SessionPtr& session, Game::RES_CHARACTER_LIST& pk
 	FString notice = result ? TEXT("정상 접근") : TEXT("비정상 접근입니다.");
 	
 
-	AsyncTask(ENamedThreads::GameThread, [notice, session]() {
+	AsyncTask(ENamedThreads::GameThread, [result, notice, session]() {
 		if (auto* GI = Cast<UJ1GameInstance>(session->GetGameInstance()))
 		{
-			GI->OnNotice.Broadcast(notice);
+			if(result)	GI->OnNotice.Broadcast(notice);
+			else
+			{
+				GI->RequestDisconnect(ESessionType::Game);
+				UGameplayStatics::OpenLevel(GI->GetWorld(), FName("L_Login"));
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("비정상 접근")));
+			}
 		}
 	});
 

@@ -155,18 +155,19 @@ void UJ1LoginWidget::OnResultLogin(ELoginMode loginMode, bool result)
 		msg = result ? TEXT("로그인 성공!") : TEXT("로그인 실패..");
 		if (result)
 		{
+			UGameplayStatics::OpenLevel(GetWorld(), FName("L_Lobby"));
 			// TODO	: 게임 접속 시도
 			if (auto* GI = GetGameInstance<UJ1GameInstance>())
 			{
-				//GI->ConnectToServer(ESessionType::Game);
-				GI->ConnectToServer(ESessionType::Chat);
 				GI->RequestDisconnect(ESessionType::Login);
+				GI->ConnectToServer(ESessionType::Game);
+				//GI->ConnectToServer(ESessionType::Chat);
 			}
 			else
 			{
 				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("GI Is Not Valid")));
 			}
-			UGameplayStatics::OpenLevel(GetWorld(), FName("Devmap"));
+			
 		}
 		break;
 	case ELoginMode::CheckId:

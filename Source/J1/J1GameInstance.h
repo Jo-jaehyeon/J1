@@ -10,6 +10,7 @@
 
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnChatReceived, const FString&, const FString&, const FString&);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnLoginResult, ELoginMode, bool);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnNotice, FString);
 
 UCLASS()
 class J1_API UJ1GameInstance : public UGameInstance
@@ -26,13 +27,26 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void RequestDisconnect(ESessionType sessionType);
-
 	void Disconnect(ESessionType sessionType);
 
 	void SendPacket(ESessionType sessionType, asio::mutable_buffer& buffer);
 
+	int GetUserid() { return _userid; }
+	std::string GetLoginToken() { return _token; }
+	void SetUserid(int userid) { _userid = userid; }
+	void SetLoginToken(std::string token) { _token = token; }
+
 private:
 	SessionPtr FindTargetSession(ESessionType sessionType);
+
+
+public:
+	// ═════════════════════
+	//		 DELEGATE
+	// ═════════════════════
+	FOnChatReceived OnChatReceived;
+	FOnLoginResult	OnLoginResult;
+	FOnNotice		OnNotice;
 
 private:
 	SessionPtr loginSession;
@@ -40,8 +54,6 @@ private:
 	SessionPtr chatSession;
 	bool bLeaveConfirmed = false;
 
-public:
-	// Delegate
-	FOnChatReceived OnChatReceived;
-	FOnLoginResult OnLoginResult;
+	int			_userid;
+	std::string _token;
 };

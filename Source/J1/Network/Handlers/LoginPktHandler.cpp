@@ -18,9 +18,11 @@ bool Handle_RES_LOGIN(SessionPtr& session, Login::RES_LOGIN& pkt)
 
 	bool result = (account > 0);
 
-	AsyncTask(ENamedThreads::GameThread, [result, session]() {
+	AsyncTask(ENamedThreads::GameThread, [result, account, token, session]() {
 		if (auto* GI = Cast<UJ1GameInstance>(session->GetGameInstance()))
 		{
+			GI->SetUserid(account);
+			GI->SetLoginToken(token);
 			GI->OnLoginResult.Broadcast(ELoginMode::Login, result);
 		}
 	});

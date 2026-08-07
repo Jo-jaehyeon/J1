@@ -4,21 +4,23 @@
 
 #include "J1.h"
 
+class UJ1GameInstance;
 /**
  *
  */
 class J1_API PacketSession : public TSharedFromThis<PacketSession>
 {
 public:
-	PacketSession(asio::io_context* io_context);
+	PacketSession(asio::io_context* io_context, UJ1GameInstance* gameInstance);
 	~PacketSession();
 
 	asio::io_context& GetIoContext() { return *_io_context; };
-	UGameInstance* GetGameInstance() { return GameInstance; }
+	UJ1GameInstance* GetGameInstance() { return GameInstance; }
 	void SetPlayerId(int32 playerId) { _player_id = playerId; }
 
 	void Run();
 	void Connect(std::string host, int port);
+	void Disconnect();
 	virtual void RequestDisconnect() = 0;
 
 	void AsyncRead();
@@ -45,10 +47,11 @@ protected:
 protected:
 	asio::io_context* _io_context;
 	tcp::socket _socket;
-	UGameInstance* GameInstance;
+	UJ1GameInstance* GameInstance;
 	TSharedPtr<class NetworkWorker> NetworkThread;
 
 	int32 _player_id;
+	std::atomic<bool> _connected = false;
 
 	static const int RecvBufferSize = 1024;
 	char _recvBuffer[RecvBufferSize];

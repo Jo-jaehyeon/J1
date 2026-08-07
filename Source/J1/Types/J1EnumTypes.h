@@ -1,6 +1,14 @@
 ﻿#pragma once
 
 UENUM(BlueprintType)
+enum class ESessionType : uint8
+{
+    Login,
+    Game,
+    Chat
+};
+
+UENUM(BlueprintType)
 enum class ELoginMode : uint8
 {
     Login,

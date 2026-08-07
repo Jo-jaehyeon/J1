@@ -11,7 +11,7 @@
 class J1_API LoginSession : public PacketSession
 {
 public:
-	LoginSession(asio::io_context* io_context);
+	LoginSession(asio::io_context* io_context, UJ1GameInstance* gameInstance);
 	~LoginSession();
 
 

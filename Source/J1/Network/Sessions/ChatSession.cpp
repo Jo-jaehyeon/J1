@@ -3,8 +3,8 @@
 #include "Handlers/ChatPktHandler.h"
 #include "../../J1GameInstance.h"
 
-ChatSession::ChatSession(asio::io_context* io_context)
-	: PacketSession(io_context)
+ChatSession::ChatSession(asio::io_context* io_context, UJ1GameInstance* gameInstance)
+	: PacketSession(io_context, gameInstance)
 {
 	ChatPktHandler::Init();
 }
@@ -16,10 +16,10 @@ ChatSession::~ChatSession()
 void ChatSession::RequestDisconnect()
 {
 	// Leave Room Pkt 발송
-	Chat::REQ_LEAVE_ROOM pkt;
+	Chat::REQ_LEAVE_CHATROOM pkt;
 	pkt.set_player_id(_player_id);
 	
-	SEND_PACKET(Chat::PacketType::PKT_REQ_LEAVE_ROOM, pkt);
+	SEND_PACKET(GetGameInstance(), ESessionType::Chat, Chat::PacketType::PKT_REQ_LEAVE_CHATROOM, pkt);
 }
 
 void ChatSession::OnConnect(const boost::system::error_code& err)
@@ -28,10 +28,10 @@ void ChatSession::OnConnect(const boost::system::error_code& err)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Connection Success~")));
 		// Enter Room Pkt 발송
-		Chat::REQ_ENTER_ROOM pkt;
+		Chat::REQ_ENTER_CHATROOM pkt;
 		pkt.set_name("admin");
 		
-		SEND_PACKET(Chat::PacketType::PKT_REQ_ENTER_ROOM, pkt);
+		SEND_PACKET(GetGameInstance(), ESessionType::Chat, Chat::PacketType::PKT_REQ_ENTER_CHATROOM, pkt);
 		
 		AsyncRead();
 	}

@@ -2,14 +2,14 @@
 #include "J1GameInstance.h"
 #include "Network/Sessions/PacketSession.h"
 
-PacketHandlerFunc GPacketHandler[UINT16_MAX];
+ChatHandlerFunc GChatPacketHandler[UINT16_MAX];
 
-bool Handle_INVALID(SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset)
+bool Handle_Chat_INVALID(SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset)
 {
 	return false;
 }
 
-bool Handle_RES_ENTER_ROOM(SessionPtr& session, Chat::RES_ENTER_ROOM& pkt)
+bool Handle_RES_ENTER_CHATROOM(SessionPtr& session, Chat::RES_ENTER_CHATROOM& pkt)
 {
 	bool success = pkt.result();
 	int playerId = pkt.player_id();
@@ -26,7 +26,7 @@ bool Handle_RES_ENTER_ROOM(SessionPtr& session, Chat::RES_ENTER_ROOM& pkt)
 	return true;
 }
 
-bool Handle_RES_LEAVE_ROOM(SessionPtr& session, Chat::RES_LEAVE_ROOM& pkt)
+bool Handle_RES_LEAVE_CHATROOM(SessionPtr& session, Chat::RES_LEAVE_CHATROOM& pkt)
 {
 	bool success = pkt.result();
 	AsyncTask(ENamedThreads::GameThread, [success, session]() {
@@ -34,7 +34,7 @@ bool Handle_RES_LEAVE_ROOM(SessionPtr& session, Chat::RES_LEAVE_ROOM& pkt)
 		{
 			if (auto* GI = Cast<UJ1GameInstance>(session->GetGameInstance()))
 			{
-				GI->Disconnect();
+				GI->Disconnect(ESessionType::Chat);
 			}
 			UE_LOG(LogTemp, Log, TEXT("Successfully end the chat"));
 		}

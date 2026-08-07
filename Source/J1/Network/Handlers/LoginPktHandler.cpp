@@ -2,7 +2,7 @@
 #include "J1GameInstance.h"
 #include "Network/Sessions/PacketSession.h"
 #include "Types/J1EnumTypes.h"
-
+#include <string>
 
 LoginHandlerFunc GLoginPacketHandler[UINT16_MAX];
 
@@ -14,11 +14,15 @@ bool Handle_Login_INVALID(SessionPtr& session, boost::asio::mutable_buffer& buff
 bool Handle_RES_LOGIN(SessionPtr& session, Login::RES_LOGIN& pkt)
 {
 	int account = pkt.player_id();
+	std::string token = pkt.token();
+
 	bool result = (account > 0);
 
-	AsyncTask(ENamedThreads::GameThread, [result, session]() {
+	AsyncTask(ENamedThreads::GameThread, [result, account, token, session]() {
 		if (auto* GI = Cast<UJ1GameInstance>(session->GetGameInstance()))
 		{
+			GI->SetUserid(account);
+			GI->SetLoginToken(token);
 			GI->OnLoginResult.Broadcast(ELoginMode::Login, result);
 		}
 	});

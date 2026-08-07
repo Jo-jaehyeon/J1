@@ -10,6 +10,7 @@
 
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnChatReceived, const FString&, const FString&, const FString&);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnLoginResult, ELoginMode, bool);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnNotice, FString);
 
 UCLASS()
 class J1_API UJ1GameInstance : public UGameInstance
@@ -18,24 +19,41 @@ class J1_API UJ1GameInstance : public UGameInstance
 
 public:
 	virtual void Shutdown() override;
-	// GameServer
+	
+	// Server
 public:
 	UFUNCTION(BlueprintCallable)
-	void ConnectToGameServer();
+	void ConnectToServer(ESessionType sessionType);
 
 	UFUNCTION(BlueprintCallable)
-	void RequeseDisconnect();
+	void RequestDisconnect(ESessionType sessionType);
+	void Disconnect(ESessionType sessionType);
 
-	void Disconnect();
+	void SendPacket(ESessionType sessionType, asio::mutable_buffer& buffer);
 
-	void SendPacket(asio::mutable_buffer& buffer);
+	int GetUserid() { return _userid; }
+	std::string GetLoginToken() { return _token; }
+	void SetUserid(int userid) { _userid = userid; }
+	void SetLoginToken(std::string token) { _token = token; }
 
 private:
-	SessionPtr GameSession;
-	bool bLeaveConfirmed = false;
+	SessionPtr FindTargetSession(ESessionType sessionType);
+
 
 public:
-	// Delegate
+	// ═════════════════════
+	//		 DELEGATE
+	// ═════════════════════
 	FOnChatReceived OnChatReceived;
-	FOnLoginResult OnLoginResult;
+	FOnLoginResult	OnLoginResult;
+	FOnNotice		OnNotice;
+
+private:
+	SessionPtr loginSession;
+	SessionPtr gameSession;
+	SessionPtr chatSession;
+	bool bLeaveConfirmed = false;
+
+	int			_userid;
+	std::string _token;
 };

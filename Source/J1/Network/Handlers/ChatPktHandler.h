@@ -11,8 +11,8 @@ extern ChatHandlerFunc GChatPacketHandler[UINT16_MAX];
 
 // Custom Handler
 bool Handle_Chat_INVALID(SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset);
-bool Handle_RES_ENTER_ROOM(SessionPtr& session, Chat::RES_ENTER_ROOM&pkt);
-bool Handle_RES_LEAVE_ROOM(SessionPtr& session, Chat::RES_LEAVE_ROOM&pkt);
+bool Handle_RES_ENTER_CHATROOM(SessionPtr& session, Chat::RES_ENTER_CHATROOM&pkt);
+bool Handle_RES_LEAVE_CHATROOM(SessionPtr& session, Chat::RES_LEAVE_CHATROOM&pkt);
 bool Handle_RES_CHAT(SessionPtr& session, Chat::RES_CHAT&pkt);
 
 class ChatPktHandler
@@ -22,11 +22,11 @@ public:
 	{
 		for (int32 i = 0; i < UINT16_MAX; i++)
 			GChatPacketHandler[i] = Handle_Chat_INVALID;
-		GChatPacketHandler[Chat::PacketType::PKT_RES_ENTER_ROOM] = [](SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset) {
-			return DispatchPacket<Chat::RES_ENTER_ROOM>(Handle_RES_ENTER_ROOM, session, buffer, offset);
+		GChatPacketHandler[Chat::PacketType::PKT_RES_ENTER_CHATROOM] = [](SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset) {
+			return DispatchPacket<Chat::RES_ENTER_CHATROOM>(Handle_RES_ENTER_CHATROOM, session, buffer, offset);
 			};
-		GChatPacketHandler[Chat::PacketType::PKT_RES_LEAVE_ROOM] = [](SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset) {
-			return DispatchPacket<Chat::RES_LEAVE_ROOM>(Handle_RES_LEAVE_ROOM, session, buffer, offset);
+		GChatPacketHandler[Chat::PacketType::PKT_RES_LEAVE_CHATROOM] = [](SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset) {
+			return DispatchPacket<Chat::RES_LEAVE_CHATROOM>(Handle_RES_LEAVE_CHATROOM, session, buffer, offset);
 			};
 		GChatPacketHandler[Chat::PacketType::PKT_RES_CHAT] = [](SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset) {
 			return DispatchPacket<Chat::RES_CHAT>(Handle_RES_CHAT, session, buffer, offset);

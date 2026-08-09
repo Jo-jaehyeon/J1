@@ -48,11 +48,11 @@ protected:
 	// ════════════════════════════════════
 	//              UMG 바인딩
 	// ════════════════════════════════════
-	UPROPERTY(meta = (BindWidget))	TObjectPtr<UButton>		ClickArea;
-	UPROPERTY(meta = (BindWidget))	TObjectPtr<UTextBlock>	Text_Class;
-	UPROPERTY(meta = (BindWidget))	TObjectPtr<UTextBlock>	Text_Name;
-	UPROPERTY(meta = (BindWidget))	TObjectPtr<UTextBlock>	Text_Level;
-	UPROPERTY(meta = (BindWidget))	TObjectPtr<UImage>		Image_SelectedCheck;
+	UPROPERTY(meta = (BindWidget))	TObjectPtr<UButton>		Btn_ClickArea;
+	UPROPERTY(meta = (BindWidget))	TObjectPtr<UTextBlock>	Txt_Class;
+	UPROPERTY(meta = (BindWidget))	TObjectPtr<UTextBlock>	Txt_Name;
+	UPROPERTY(meta = (BindWidget))	TObjectPtr<UTextBlock>	Txt_Level;
+	UPROPERTY(meta = (BindWidget))	TObjectPtr<UImage>		Img_SelectedCheck;
 
 
 	FGuid CharacterUniqueID;

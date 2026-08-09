@@ -137,7 +137,7 @@ void UJ1CustomizingWidget::OnConfirmClicked()
 
 void UJ1CustomizingWidget::OnBackClicked()
 {
-	UGameplayStatics::OpenLevel(GetWorld(), FName("L_Login"));
+	UGameplayStatics::OpenLevel(GetWorld(), FName("L_Lobby"));
 }
 
 void UJ1CustomizingWidget::OnCreateClicked()

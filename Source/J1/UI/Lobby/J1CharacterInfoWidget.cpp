@@ -9,10 +9,10 @@ void UJ1CharacterInfoWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	if (ClickArea)
+	if (Btn_ClickArea)
 	{
-		ClickArea->OnClicked.RemoveDynamic(this, &UJ1CharacterInfoWidget::HandleButtonClicked);
-		ClickArea->OnClicked.AddDynamic(this, &UJ1CharacterInfoWidget::HandleButtonClicked);
+		Btn_ClickArea->OnClicked.RemoveDynamic(this, &UJ1CharacterInfoWidget::HandleButtonClicked);
+		Btn_ClickArea->OnClicked.AddDynamic(this, &UJ1CharacterInfoWidget::HandleButtonClicked);
 	}
 
 	SetSelectedStyle(false);
@@ -22,25 +22,16 @@ void UJ1CharacterInfoWidget::SetData(const FGuid& InCharacterId, const FString& 
 {
 	CharacterUniqueID = InCharacterId;
 
-	if (Text_Name)
-	{
-		Text_Name->SetText(FText::FromString(InName));
-	}
-	if (Text_Class)
-	{
-		Text_Class->SetText(GetClassDisplayName(InClass));
-	}
-	if (Text_Level)
-	{
-		Text_Level->SetText(FText::Format(NSLOCTEXT("Lobby", "LevelFormat", "Lv.{0}"), FText::AsNumber(InLevel)));
-	}
+	if (Txt_Class)	Txt_Class->SetText(GetClassDisplayName(InClass));
+	if (Txt_Name)	Txt_Name->SetText(FText::FromString(InName));
+	if (Txt_Level)	Txt_Level->SetText(FText::Format(NSLOCTEXT("Lobby", "LevelFormat", "Lv.{0}"), FText::AsNumber(InLevel)));
 }
 
 void UJ1CharacterInfoWidget::SetSelectedStyle(bool bSelected)
 {
-	if (Image_SelectedCheck)
+	if (Img_SelectedCheck)
 	{
-		Image_SelectedCheck->SetVisibility(bSelected ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+		Img_SelectedCheck->SetVisibility(bSelected ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 	}
 }
 

@@ -1,6 +1,8 @@
 #pragma once
-#include "../Protocol/GameProtocol.pb.h"
 #include "Packet.h"
+#include "AuctionPktHandler.h"
+#include "BattlePktHandler.h"
+#include "LobbyPktHandler.h"
 
 #if UE_BUILD_DEBUG + UE_BUILD_DEVELOPMENT + UE_BUILD_TEST + UE_BUILD_SHIPPING >= 1
 #include "J1.h"
@@ -9,11 +11,7 @@
 using GameHandlerFunc = std::function<bool(SessionPtr&, boost::asio::mutable_buffer&, int32&)>;
 extern GameHandlerFunc GGamePacketHandler[UINT16_MAX];
 
-// Custom Handler
 bool Handle_Game_INVALID(SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset);
-bool Handle_RES_CHARACTER_LIST(SessionPtr& session, Game::RES_CHARACTER_LIST&pkt);
-bool Handle_RES_ENTER_GAME(SessionPtr& session, Game::RES_ENTER_GAME&pkt);
-bool Handle_RES_LEAVE_GAME(SessionPtr& session, Game::RES_LEAVE_GAME&pkt);
 
 class GamePktHandler
 {
@@ -22,6 +20,13 @@ public:
 	{
 		for (int32 i = 0; i < UINT16_MAX; i++)
 			GGamePacketHandler[i] = Handle_Game_INVALID;
+
+		GGamePacketHandler[Game::PacketType::PKT_RES_OPENAUCTION] = [](SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset) {
+			return DispatchPacket<Game::RES_OPENAUCTION>(Handle_RES_OPENAUCTION, session, buffer, offset);
+			};
+		GGamePacketHandler[Game::PacketType::PKT_RES_ATTACK] = [](SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset) {
+			return DispatchPacket<Game::RES_ATTACK>(Handle_RES_ATTACK, session, buffer, offset);
+			};
 		GGamePacketHandler[Game::PacketType::PKT_RES_CHARACTER_LIST] = [](SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset) {
 			return DispatchPacket<Game::RES_CHARACTER_LIST>(Handle_RES_CHARACTER_LIST, session, buffer, offset);
 			};
@@ -37,7 +42,6 @@ public:
 	{
 		boost::asio::mutable_buffer buffer = boost::asio::buffer(ptr, size);
 		int offset = 4;
-
 		return GGamePacketHandler[header.Code](session, buffer, offset);
 	}
 
@@ -55,7 +59,6 @@ private:
 			#endif
 			return false;
 		}
-
 		return func(session, pkt);
 	}
 };

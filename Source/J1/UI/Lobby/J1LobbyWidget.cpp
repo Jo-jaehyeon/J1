@@ -8,7 +8,7 @@
 #include "Components/Button.h"
 #include "Manager/ActorComponent/J1LobbyDisplayManager.h"
 #include "Kismet/GameplayStatics.h"
-#include "Protocol/GameProtocol.pb.h"
+#include "Network/Protocol/LobbyProtocol.pb.h"
 
 void UJ1LobbyWidget::NativeConstruct()
 {

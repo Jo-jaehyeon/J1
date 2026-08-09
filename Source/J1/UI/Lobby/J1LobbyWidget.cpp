@@ -2,9 +2,12 @@
 
 
 #include "UI/Lobby/J1LobbyWidget.h"
-#include "Components/SizeBox.h"
-#include "Components/Textblock.h"
 #include "J1GameInstance.h"
+#include "Components/Overlay.h"
+#include "Components/Textblock.h"
+#include "Components/Button.h"
+#include "Manager/ActorComponent/J1LobbyDisplayManager.h"
+#include "Kismet/GameplayStatics.h"
 #include "Protocol/GameProtocol.pb.h"
 
 void UJ1LobbyWidget::NativeConstruct()
@@ -12,6 +15,13 @@ void UJ1LobbyWidget::NativeConstruct()
 	// Binding
 	UJ1GameInstance* GI = Cast<UJ1GameInstance>(GWorld->GetGameInstance());
 	GI->OnNotice.AddUObject(this, &UJ1LobbyWidget::OnNotice);
+
+	if (Btn_StartGame)			Btn_StartGame->OnClicked.AddDynamic(this, &UJ1LobbyWidget::HandleStartGameClicked);
+	if (Btn_DeleteCharacter)	Btn_DeleteCharacter->OnClicked.AddDynamic(this, &UJ1LobbyWidget::HandleDeleteCharacterClicked);
+	if (Btn_CreateCharacter)	Btn_CreateCharacter->OnClicked.AddDynamic(this, &UJ1LobbyWidget::HandleCreateCharacterClicked);
+	
+	// 선택된 캐릭터가 없을 때는 두 버튼 모두 비활성화
+	HandleSelectionChanged(false);	
 
 	// 로그인 검증 및 캐릭터 목록 요구 패킷 발송
 	Game::REQ_CHARACTER_LIST charLIST_Pkt;
@@ -24,15 +34,74 @@ void UJ1LobbyWidget::NativeConstruct()
 
 void UJ1LobbyWidget::NativeDestruct()
 {
+	if (DisplayManager)
+	{
+		DisplayManager->OnSelectionChanged.RemoveDynamic(this, &UJ1LobbyWidget::HandleSelectionChanged);
+	}
 	Super::NativeDestruct();
+}
+
+void UJ1LobbyWidget::SetDisplayManager(UJ1LobbyDisplayManager* InManager)
+{
+	if (DisplayManager)
+	{
+		DisplayManager->OnSelectionChanged.RemoveDynamic(this, &UJ1LobbyWidget::HandleSelectionChanged);
+	}
+
+	DisplayManager = InManager;
+	if (DisplayManager)
+	{
+		DisplayManager->OnSelectionChanged.AddDynamic(this, &UJ1LobbyWidget::HandleSelectionChanged);
+		HandleSelectionChanged(DisplayManager->HasValidSelection());
+	}
+}
+
+void UJ1LobbyWidget::HandleStartGameClicked()
+{
+	if (DisplayManager)
+	{
+		DisplayManager->OnClickStartGame();
+	}
+}
+
+void UJ1LobbyWidget::HandleDeleteCharacterClicked()
+{
+	if (DisplayManager)
+	{
+		// 매니저 내부에서 서버 요청 브로드캐스트 + 로비 화면 즉시 제거(RemoveCharacterLocally)를 함께 수행한다.
+		DisplayManager->OnClickDeleteCharacter();
+	}
+}
+
+void UJ1LobbyWidget::HandleCreateCharacterClicked()
+{
+	UGameplayStatics::OpenLevel(GetWorld(), FName("L_Customize"));
+}
+
+void UJ1LobbyWidget::HandleSelectionChanged(bool bHasValidSelection)
+{
+	if (Btn_StartGame)			Btn_StartGame->SetIsEnabled(bHasValidSelection);
+	if (Btn_DeleteCharacter)	Btn_DeleteCharacter->SetIsEnabled(bHasValidSelection);
 }
 
 void UJ1LobbyWidget::OnNotice(FString text)
 {
-
-	SizeBox_Notice->SetVisibility(ESlateVisibility::Visible);
+	Overlay_Notice->SetVisibility(ESlateVisibility::Visible);
 	Txt_Notice->SetText(FText::FromString(text));
 
-	// TODO 타이머로 n초 뒤 popup 닫히게
-	
+	TWeakObjectPtr<UOverlay> WeakOverlay(Overlay_Notice);
+
+	GetWorld()->GetTimerManager().ClearTimer(PopupVisibilityTimerHandle);
+	GetWorld()->GetTimerManager().SetTimer(
+		PopupVisibilityTimerHandle,
+		FTimerDelegate::CreateLambda([WeakOverlay]()
+			{
+				if (WeakOverlay.IsValid())
+				{
+					WeakOverlay->SetVisibility(ESlateVisibility::Hidden);
+				}
+			}),
+		1.0f,
+		false
+	);
 }

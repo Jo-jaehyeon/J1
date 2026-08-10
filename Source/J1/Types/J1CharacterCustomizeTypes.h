@@ -115,7 +115,7 @@ struct FLobbySlotInfo
     GENERATED_BODY()
 
     // 서버에서 캐릭터를 식별하기 위한 고유 ID.
-    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  FGuid CharacterUniqueID;
+    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  int32 CharacterUniqueID = INDEX_NONE;
     UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  int32 SlotIndex = 0;
 
     UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  ECharacterClass ClassType = ECharacterClass::Warrior;

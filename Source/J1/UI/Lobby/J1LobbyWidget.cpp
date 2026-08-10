@@ -18,7 +18,6 @@ void UJ1LobbyWidget::NativeConstruct()
 
 	if (Btn_StartGame)			Btn_StartGame->OnClicked.AddDynamic(this, &UJ1LobbyWidget::HandleStartGameClicked);
 	if (Btn_DeleteCharacter)	Btn_DeleteCharacter->OnClicked.AddDynamic(this, &UJ1LobbyWidget::HandleDeleteCharacterClicked);
-	if (Btn_CreateCharacter)	Btn_CreateCharacter->OnClicked.AddDynamic(this, &UJ1LobbyWidget::HandleCreateCharacterClicked);
 	
 	// 선택된 캐릭터가 없을 때는 두 버튼 모두 비활성화
 	HandleSelectionChanged(false);	
@@ -71,11 +70,6 @@ void UJ1LobbyWidget::HandleDeleteCharacterClicked()
 		// 매니저 내부에서 서버 요청 브로드캐스트 + 로비 화면 즉시 제거(RemoveCharacterLocally)를 함께 수행한다.
 		DisplayManager->OnClickDeleteCharacter();
 	}
-}
-
-void UJ1LobbyWidget::HandleCreateCharacterClicked()
-{
-	UGameplayStatics::OpenLevel(GetWorld(), FName("L_Customize"));
 }
 
 void UJ1LobbyWidget::HandleSelectionChanged(bool bHasValidSelection)

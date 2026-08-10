@@ -7,6 +7,7 @@
 #include "Materials/MaterialInterface.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
+#include "UI/Lobby/J1CharacterInfoWidget.h"
 
 // Sets default values
 AJ1LobbyCharacterActor::AJ1LobbyCharacterActor()
@@ -22,12 +23,21 @@ AJ1LobbyCharacterActor::AJ1LobbyCharacterActor()
 	InfoWidgetComp->SetWidgetSpace(EWidgetSpace::Screen); // 항상 카메라를 향하고 화면상 크기 일정
 	InfoWidgetComp->SetRelativeLocation(FVector(0.f, 0.f, -10.f)); // 발밑 하단 오프셋(레벨/스케일에 맞게 조정)
 	InfoWidgetComp->SetDrawSize(FVector2D(220.f, 80.f));
+	InfoWidgetComp->SetVisibility(true);
 }
 
 // Called when the game starts or when spawned
 void AJ1LobbyCharacterActor::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// InfoWidgetComp의 위젯 인스턴스는 캐릭터 있음/없음 상태와 무관하게 항상 동일하게 유지되므로
+	// 클릭 델리게이트는 BeginPlay에서 한 번만 바인딩하면 된다.
+	if (UJ1CharacterInfoWidget* InfoWidget = Cast<UJ1CharacterInfoWidget>(InfoWidgetComp->GetUserWidgetObject()))
+	{
+		InfoWidget->OnWidgetClicked.RemoveDynamic(this, &AJ1LobbyCharacterActor::HandleInfoWidgetClicked);
+		InfoWidget->OnWidgetClicked.AddDynamic(this, &AJ1LobbyCharacterActor::HandleInfoWidgetClicked);
+	}
 }
 
 void AJ1LobbyCharacterActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -42,10 +52,50 @@ void AJ1LobbyCharacterActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
-// Called every frame
-void AJ1LobbyCharacterActor::Tick(float DeltaTime)
+void AJ1LobbyCharacterActor::SetFilledSlot(const FLobbySlotInfo& InInfo)
 {
-	Super::Tick(DeltaTime);
+	CachedInfo = InInfo;
+	bIsSelected = false;
+	bIsEmptySlot = false;
+
+	BodyMesh->SetVisibility(true, false);
+
+	// 이전에 진행 중이던 로드 요청이 있다면 취소 (풀링된 액터가 다른 캐릭터 데이터로 재사용되는 경우)
+	if (ActiveLoadHandle.IsValid())
+	{
+		ActiveLoadHandle->CancelHandle();
+		ActiveLoadHandle.Reset();
+	}
+
+	const FCharacterSkinBaseData* ClassRow = FindClassRow(InInfo.ClassType);
+	if (!ClassRow)
+	{
+		return;
+	}
+
+	StartAsyncLoad(*ClassRow, InInfo);
+}
+
+void AJ1LobbyCharacterActor::SetEmptySlot(int32 InSlotIndex)
+{
+	CachedInfo = FLobbySlotInfo();
+	CachedInfo.SlotIndex = InSlotIndex;
+	bIsSelected = false;
+	bIsEmptySlot = true;
+
+	BodyMesh->SetVisibility(false, false);
+
+	// 진행 중이던 캐릭터 애셋 로드가 있다면 취소 (빈 슬롯으로 전환되므로 더 이상 필요 없음)
+	if (ActiveLoadHandle.IsValid())
+	{
+		ActiveLoadHandle->CancelHandle();
+		ActiveLoadHandle.Reset();
+	}
+
+	if (UJ1CharacterInfoWidget* InfoWidget = Cast<UJ1CharacterInfoWidget>(InfoWidgetComp->GetUserWidgetObject()))
+	{
+		InfoWidget->SetEmptyData(InSlotIndex);
+	}
 }
 
 void AJ1LobbyCharacterActor::SetSelected(bool bInSelected)
@@ -59,24 +109,6 @@ void AJ1LobbyCharacterActor::SetSelected(bool bInSelected)
 	{
 		InfoWidget->SetSelectedStyle(bIsSelected);
 	}
-}
-
-void AJ1LobbyCharacterActor::InitFromServerInfo(const FLobbySlotInfo& InInfo)
-{
-	CachedInfo = InInfo;
-	bIsSelected = false;
-
-	// 이전에 진행 중이던 로드 요청이 있다면 취소 (풀링된 액터가 다른 캐릭터 데이터로 재사용되는 경우)
-	if (ActiveLoadHandle.IsValid())
-	{
-		ActiveLoadHandle->CancelHandle();
-		ActiveLoadHandle.Reset();
-	}
-
-	const FCharacterSkinBaseData* ClassRow = FindClassRow(InInfo.ClassType);
-	if (!ClassRow)			      return;
-	
-	StartAsyncLoad(*ClassRow, InInfo);
 }
 
 const FCharacterSkinBaseData* AJ1LobbyCharacterActor::FindClassRow(ECharacterClass InClass) const
@@ -155,7 +187,8 @@ void AJ1LobbyCharacterActor::HandleAssetsLoaded(uint32 RequestId, ECharacterClas
 	// 로드가 끝나기 전에 InitFromServerInfo가 다시 호출되어 다른 데이터를 가리키게 됐다면
 	// 이 콜백은 낡은 것이므로 화면에 반영하지 않고 무시
 	if (RequestId != LoadRequestGeneration)		return;
-
+	if (bIsEmptySlot)							return;
+	
 	// 스켈레톤 / 애님블루프린트 세팅
 	if (USkeletalMesh* Mesh = ClassRow->SkeletalMesh.Get())		BodyMesh->SetSkeletalMesh(Mesh);
 	if (UClass* AnimClass = ClassRow->AnimBlueprint.Get())		BodyMesh->SetAnimInstanceClass(AnimClass);
@@ -169,9 +202,7 @@ void AJ1LobbyCharacterActor::HandleAssetsLoaded(uint32 RequestId, ECharacterClas
 	// 정보 위젯 갱신 + 클릭 델리게이트 바인딩
 	if (UJ1CharacterInfoWidget* InfoWidget = Cast<UJ1CharacterInfoWidget>(InfoWidgetComp->GetUserWidgetObject()))
 	{
-		InfoWidget->SetData(CachedInfo.CharacterUniqueID, CachedInfo.CharacterName, CachedInfo.ClassType, CachedInfo.Level);
-		InfoWidget->OnWidgetClicked.RemoveDynamic(this, &AJ1LobbyCharacterActor::HandleInfoWidgetClicked);
-		InfoWidget->OnWidgetClicked.AddDynamic(this, &AJ1LobbyCharacterActor::HandleInfoWidgetClicked);
+		InfoWidget->SetFilledData(CachedInfo.CharacterUniqueID, CachedInfo.CharacterName, CachedInfo.ClassType, CachedInfo.Level);
 	}
 
 	SetSelected(false);
@@ -230,6 +261,5 @@ void AJ1LobbyCharacterActor::ApplySkinMaterial(const FCharacterSkinBaseData& Cla
 
 void AJ1LobbyCharacterActor::HandleInfoWidgetClicked()
 {
-	OnCharacterClicked.Broadcast(CachedInfo.CharacterUniqueID);
+	OnCharacterClicked.Broadcast(CachedInfo.SlotIndex);
 }
-

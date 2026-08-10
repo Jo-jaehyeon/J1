@@ -4,6 +4,7 @@
 #include "Character/PC/J1LobbyCharacterActor.h"
 #include "GameFramework/Actor.h"
 #include "J1GameInstance.h"
+#include "Network/Protocol/LobbyProtocol.pb.h"
 
 UJ1LobbyDisplayManager::UJ1LobbyDisplayManager()
 {
@@ -13,8 +14,12 @@ UJ1LobbyDisplayManager::UJ1LobbyDisplayManager()
 void UJ1LobbyDisplayManager::BeginPlay()
 {
 	Super::BeginPlay();
-
 	EnsureActorPool();		// 풀링된 액터 소환
+
+	if (UJ1GameInstance* GI = GetOwner()->GetGameInstance<UJ1GameInstance>())
+	{
+		GI->OnLobbyListChange.AddUObject(this, &UJ1LobbyDisplayManager::HandleChanageCharactetList);
+	}
 }
 
 void UJ1LobbyDisplayManager::SetCharacterList(const TArray<FLobbySlotInfo>& InList)
@@ -27,23 +32,21 @@ void UJ1LobbyDisplayManager::SetCharacterList(const TArray<FLobbySlotInfo>& InLi
 			return A.SlotIndex < B.SlotIndex;
 		});
 
-	SelectedCharacterID.Invalidate();
+	SelectedSlotIdx = INDEX_NONE;
 	OnSelectionChanged.Broadcast(false);
 
-	CurrentPage = 0;
-	RefreshCurrentPage();
+	RefreshSlots();
 }
 
-void UJ1LobbyDisplayManager::GoToPage(int32 InPageIndex)
+void UJ1LobbyDisplayManager::SetMaxSlotCount(int32 InMaxSlotCount)
 {
-	const int32 MaxPage = FMath::Max(0, FMath::DivideAndRoundUp(CharacterList.Num(), MaxVisibleCount) - 1);
-	CurrentPage = FMath::Clamp(InPageIndex, 0, MaxPage);
-	RefreshCurrentPage();
+	TotalCharacterSlotCount = FMath::Max(0, InMaxSlotCount);
+	RefreshSlots();
 }
 
 void UJ1LobbyDisplayManager::OnClickStartGame()
 {
-	if (const FLobbySlotInfo* Info = FindCharacterInfo(SelectedCharacterID))
+	if (const FLobbySlotInfo* Info = FindCharacterInfo(SelectedSlotIdx))
 	{
 		FString Name = Info->CharacterName;
 		GetOwner()->GetGameInstance<UJ1GameInstance>()->OnNotice.Broadcast(Name);
@@ -55,16 +58,25 @@ void UJ1LobbyDisplayManager::OnClickStartGame()
 
 void UJ1LobbyDisplayManager::OnClickDeleteCharacter()
 {
-	if (const FLobbySlotInfo* Info = FindCharacterInfo(SelectedCharacterID))
+	if (const FLobbySlotInfo* Info = FindCharacterInfoBySlotIndex(SelectedSlotIdx))
 	{
 		const FLobbySlotInfo InfoCopy = *Info; // RemoveCharacterLocally에서 CharacterList가 변경되므로 값 복사
-		const FGuid DeletedId = InfoCopy.CharacterUniqueID;
+		const int32 DeletedId = InfoCopy.CharacterUniqueID;
 
 		// 캐릭 삭제 패킷 전송
-		
+		if (UJ1GameInstance* GI = GetOwner()->GetGameInstance<UJ1GameInstance>())
+		{
+			Game::REQ_DELETE_CHARACTER deletePkt;
+			deletePkt.set_account_id(GI->GetUserid());
+			deletePkt.set_character_id(DeletedId);
 
-		// 로비 화면에서 즉시 제거 (서버 응답을 기다리지 않는 낙관적 갱신)
-		RemoveCharacterLocally(DeletedId);
+			SEND_PACKET(GI, ESessionType::Game, Game::PacketType::PKT_REQ_DELETE_CHARACTER, deletePkt);
+
+			// 로비 화면에서 즉시 제거 (서버 응답을 기다리지 않는 낙관적 갱신)
+			RemoveCharacterLocally(SelectedSlotIdx);
+		}
+		else
+			UE_LOG(LogTemp, Warning, TEXT("캐릭터 삭제 실패 : GI is not valid"));
 	}
 }
 
@@ -75,7 +87,7 @@ void UJ1LobbyDisplayManager::EnsureActorPool()
 	if (PooledActors.Num() > 0 || !CharacterActorClass)		return;
 
 
-	const int32 PoolSize = FMath::Max(MaxVisibleCount, SlotTransforms.Num());
+	const int32 PoolSize = FMath::Max(TotalCharacterSlotCount, SlotTransforms.Num());
 	PooledActors.Reserve(PoolSize);
 
 	for (int32 i = 0; i < PoolSize; ++i)
@@ -96,74 +108,94 @@ void UJ1LobbyDisplayManager::EnsureActorPool()
 	}
 }
 
-void UJ1LobbyDisplayManager::RefreshCurrentPage()
+void UJ1LobbyDisplayManager::RefreshSlots()
 {
 	if (PooledActors.Num() == 0)		return;
 	
-	const int32 StartIdx = CurrentPage * MaxVisibleCount;
-	for (int32 SlotPos = 0; SlotPos < MaxVisibleCount; ++SlotPos)
+	for (int32 SlotIndex = 0; SlotIndex < TotalCharacterSlotCount; ++SlotIndex)
 	{
-		if (!PooledActors.IsValidIndex(SlotPos))	continue;
+		if (!PooledActors.IsValidIndex(SlotIndex))	continue;
 		
-		AJ1LobbyCharacterActor* SlotActor = PooledActors[SlotPos];
-		const int32 DataIdx = StartIdx + SlotPos;
+		AJ1LobbyCharacterActor* SlotActor = PooledActors[SlotIndex];
 
-		if (DataIdx < CharacterList.Num())
+		if (SlotTransforms.IsValidIndex(SlotIndex))
 		{
-			if (SlotTransforms.IsValidIndex(SlotPos))
-			{
-				SlotActor->SetActorTransform(SlotTransforms[SlotPos]);
-			}
-			SlotActor->InitFromServerInfo(CharacterList[DataIdx]);
-			SlotActor->SetActorHiddenInGame(false);
-			SlotActor->SetSelected(CharacterList[DataIdx].CharacterUniqueID == SelectedCharacterID);
+			SlotActor->SetActorTransform(SlotTransforms[SlotIndex]);
+		}
+		SlotActor->SetActorHiddenInGame(false);
+		
+		if (const FLobbySlotInfo* Found = FindCharacterInfoBySlotIndex(SlotIndex))
+		{
+			// 이 슬롯 번호에 캐릭터가 있는 경우 -> 캐릭터 표시
+			SlotActor->SetFilledSlot(*Found);
+			SlotActor->SetSelected(Found->SlotIndex == SelectedSlotIdx);
 		}
 		else
 		{
-			// 데이터가 없는 빈 슬롯은 화면에서 숨긴다.
-			SlotActor->SetActorHiddenInGame(true);
+			// 슬롯은 있지만 캐릭터가 없는 경우 -> "캐릭터 생성" 버튼 표시
+			SlotActor->SetEmptySlot(SlotIndex);
 		}
 	}
 }
 
-void UJ1LobbyDisplayManager::RemoveCharacterLocally(const FGuid& CharacterId)
+void UJ1LobbyDisplayManager::AddCharacterLocally(FLobbySlotInfo& Info)
 {
-	CharacterList.RemoveAll([&CharacterId](const FLobbySlotInfo& C)
+	CharacterList.Add(Info);
+}
+
+void UJ1LobbyDisplayManager::RemoveCharacterLocally(const int32& slotIdx)
+{
+	CharacterList.RemoveAll([&slotIdx](const FLobbySlotInfo& C)
 		{
-			return C.CharacterUniqueID == CharacterId;
+			return C.SlotIndex == slotIdx;
 		});
 
-	if (SelectedCharacterID == CharacterId)
+	if (SelectedSlotIdx == slotIdx)
 	{
-		SelectedCharacterID.Invalidate();
+		SelectedSlotIdx = INDEX_NONE;
 		OnSelectionChanged.Broadcast(false);
 	}
 
 	// 삭제된 캐릭터 액터를 즉시 숨기고, 뒤 페이지의 캐릭터를 당겨와 재배치
-	RefreshCurrentPage();
+	RefreshSlots();
 }
 
-FLobbySlotInfo* UJ1LobbyDisplayManager::FindCharacterInfo(const FGuid& CharacterId)
+void UJ1LobbyDisplayManager::HandleChanageCharactetList(bool Isadd, FLobbySlotInfo& Info)
 {
-	return CharacterList.FindByPredicate([&CharacterId](const FLobbySlotInfo& C)
+	if (Isadd)
+		AddCharacterLocally(Info);
+	else
+		RemoveCharacterLocally(Info.SlotIndex);
+}
+
+FLobbySlotInfo* UJ1LobbyDisplayManager::FindCharacterInfo(int32 CharacterId)
+{
+	return CharacterList.FindByPredicate([CharacterId](const FLobbySlotInfo& C)
 		{
 			return C.CharacterUniqueID == CharacterId;
 		});
 }
 
-void UJ1LobbyDisplayManager::HandleCharacterClicked(FGuid ClickedCharacterId)
+const FLobbySlotInfo* UJ1LobbyDisplayManager::FindCharacterInfoBySlotIndex(int32 InSlotIndex) const
 {
-	SelectedCharacterID = ClickedCharacterId;
+	return CharacterList.FindByPredicate([InSlotIndex](const FLobbySlotInfo& C)
+	{
+		return C.SlotIndex == InSlotIndex;
+	});
+}
+
+void UJ1LobbyDisplayManager::HandleCharacterClicked(int32 ClickedSlotId)
+{
+	SelectedSlotIdx = ClickedSlotId;
 
 	// 현재 페이지에 보이는 모든 액터의 선택 표시를 갱신
 	for (AJ1LobbyCharacterActor* SlotActor : PooledActors)
 	{
 		if (SlotActor && !SlotActor->IsHidden())
 		{
-			SlotActor->SetSelected(SlotActor->GetCharacterUniqueID() == SelectedCharacterID);
+			SlotActor->SetSelected(SlotActor->GetCharacterSlotIdx() == SelectedSlotIdx);
 		}
 	}
 
 	OnSelectionChanged.Broadcast(HasValidSelection());
 }
-

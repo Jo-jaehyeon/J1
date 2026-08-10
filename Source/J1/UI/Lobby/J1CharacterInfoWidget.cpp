@@ -4,6 +4,8 @@
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 #include "Components/Image.h"
+#include "Kismet/GameplayStatics.h"
+#include "J1GameInstance.h"
 
 void UJ1CharacterInfoWidget::NativeConstruct()
 {
@@ -18,13 +20,45 @@ void UJ1CharacterInfoWidget::NativeConstruct()
 	SetSelectedStyle(false);
 }
 
-void UJ1CharacterInfoWidget::SetData(const FGuid& InCharacterId, const FString& InName, ECharacterClass InClass, int32 InLevel)
+void UJ1CharacterInfoWidget::SetFilledData(int32 InCharacterId, const FString& InName, ECharacterClass InClass, int32 InLevel)
 {
 	CharacterUniqueID = InCharacterId;
+	bIsEmptyState = false;
+	SlotIndex = INDEX_NONE;
 
-	if (Txt_Class)	Txt_Class->SetText(GetClassDisplayName(InClass));
-	if (Txt_Name)	Txt_Name->SetText(FText::FromString(InName));
-	if (Txt_Level)	Txt_Level->SetText(FText::Format(NSLOCTEXT("Lobby", "LevelFormat", "Lv.{0}"), FText::AsNumber(InLevel)));
+	if (Txt_Class)
+	{
+		Txt_Class->SetText(GetClassDisplayName(InClass));
+		Txt_Class->SetVisibility(ESlateVisibility::Visible);
+	}
+	if (Txt_Name)
+	{
+		Txt_Name->SetText(FText::FromString(InName));
+		Txt_Name->SetVisibility(ESlateVisibility::Visible);
+	}
+	if (Txt_Level)
+	{
+		Txt_Level->SetText(FText::Format(NSLOCTEXT("Lobby", "LevelFormat", "Lv.{0}"), FText::AsNumber(InLevel)));
+		Txt_Level->SetVisibility(ESlateVisibility::Visible);
+	}
+}
+
+void UJ1CharacterInfoWidget::SetEmptyData(int32 InSlotIndex)
+{
+	CharacterUniqueID = INDEX_NONE;
+	bIsEmptyState = true;
+	SlotIndex = InSlotIndex;
+
+	if (Txt_Name)
+	{
+		Txt_Name->SetText(NSLOCTEXT("Lobby", "EmptySlotLabel", "캐릭터 생성 하기"));
+		Txt_Name->SetVisibility(ESlateVisibility::Visible);
+	}
+	if (Txt_Class)	Txt_Class->SetVisibility(ESlateVisibility::Collapsed);
+	if (Txt_Level)	Txt_Level->SetVisibility(ESlateVisibility::Collapsed);
+	
+
+	SetSelectedStyle(false);
 }
 
 void UJ1CharacterInfoWidget::SetSelectedStyle(bool bSelected)
@@ -37,6 +71,12 @@ void UJ1CharacterInfoWidget::SetSelectedStyle(bool bSelected)
 
 void UJ1CharacterInfoWidget::HandleButtonClicked()
 {
+	if (bIsEmptyState)
+	{
+		UGameplayStatics::OpenLevel(this, "L_Customize");
+		return;
+	}
+	
 	OnWidgetClicked.Broadcast();
 }
 

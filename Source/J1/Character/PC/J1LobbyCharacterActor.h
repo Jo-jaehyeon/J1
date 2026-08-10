@@ -11,8 +11,7 @@ class USkeletalMeshComponent;
 class UWidgetComponent;
 class UCharacterInfoWidget;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLobbyCharacterClicked, FGuid, ClickedCharacterId);
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLobbyCharacterClicked, int32, ClickedCharacterId);
 
 UCLASS()
 class J1_API AJ1LobbyCharacterActor : public AActor
@@ -20,23 +19,21 @@ class J1_API AJ1LobbyCharacterActor : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	AJ1LobbyCharacterActor();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-public:
+	UFUNCTION(BlueprintCallable, Category = "Lobby")	void SetFilledSlot(const FLobbySlotInfo& InInfo);
+	UFUNCTION(BlueprintCallable, Category = "Lobby")	void SetEmptySlot(int32 InSlotIndex);
+	UFUNCTION(BlueprintPure, Category = "Lobby")		bool IsEmptySlot() const { return bIsEmptySlot; }
 	UFUNCTION(BlueprintCallable, Category = "Lobby")	void SetSelected(bool bInSelected);
-	UFUNCTION(BlueprintCallable, Category = "Lobby")	void InitFromServerInfo(const FLobbySlotInfo& InInfo);
 
 	UFUNCTION(BlueprintPure, Category = "Lobby")	
-	FGuid GetCharacterUniqueID() const { return CachedInfo.CharacterUniqueID; }
+	int32 GetCharacterSlotIdx() const { return CachedInfo.SlotIndex; }
 	UFUNCTION(BlueprintPure, Category = "Lobby")
 	const FLobbySlotInfo& GetCharacterInfo() const { return CachedInfo; }
 
@@ -57,6 +54,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")	
 	TObjectPtr<UWidgetComponent> InfoWidgetComp;
 
+	// ═════════════════════
+	//		 DELEGATE
+	// ═════════════════════
 	UPROPERTY(BlueprintAssignable, Category = "Lobby")						
 	FOnLobbyCharacterClicked OnCharacterClicked;
 
@@ -69,6 +69,7 @@ protected:
 
 	UPROPERTY()		FLobbySlotInfo CachedInfo;
 	UPROPERTY()		bool bIsSelected = false;
+	UPROPERTY()		bool bIsEmptySlot = false;
 
 	// 현재 진행 중인 비동기 로드 요청 핸들.
 	TSharedPtr<struct FStreamableHandle> ActiveLoadHandle;

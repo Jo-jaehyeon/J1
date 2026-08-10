@@ -10,8 +10,6 @@
 class AJ1LobbyCharacterActor;
 class AActor;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLobbyRequestStartGame, FLobbySlotInfo, RequestedCharacter);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLobbyRequestDeleteCharacter, FLobbySlotInfo, RequestedCharacter);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLobbySelectionChanged, bool, bHasValidSelection);
 
 UCLASS(BlueprintType, Blueprintable, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -26,27 +24,26 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "Lobby")
-	void SetCharacterList(const TArray<FLobbySlotInfo>& InList);
-
-	UFUNCTION(BlueprintCallable, Category = "Lobby") void GoToPage(int32 InPageIndex);
-	UFUNCTION(BlueprintCallable, Category = "Lobby") void NextPage(int32 InPageIndex) { GoToPage(CurrentPage + 1); }
-	UFUNCTION(BlueprintCallable, Category = "Lobby") void PrevPage(int32 InPageIndex) { GoToPage(CurrentPage - 1); }
+	UFUNCTION(BlueprintCallable, Category = "Lobby") void SetCharacterList(const TArray<FLobbySlotInfo>& InList);
+	UFUNCTION(BlueprintCallable, Category = "Lobby") void SetMaxSlotCount(int32 InMaxSlotCount);
 
 	UFUNCTION(BlueprintCallable, Category = "Lobby") void OnClickStartGame();
 	UFUNCTION(BlueprintCallable, Category = "Lobby") void OnClickDeleteCharacter();
 
 	UFUNCTION(BlueprintPure, Category = "Lobby") 
-	bool HasValidSelection() const { return SelectedCharacterID.IsValid(); }
+	bool HasValidSelection() const { return SelectedSlotIdx != INDEX_NONE; }
 
 protected:
 	void EnsureActorPool();
-	void RefreshCurrentPage();
-	void RemoveCharacterLocally(const FGuid& CharacterId);
-	FLobbySlotInfo* FindCharacterInfo(const FGuid& CharacterId);
+	void RefreshSlots();
+	void AddCharacterLocally(FLobbySlotInfo& Info);
+	void RemoveCharacterLocally(const int32& characterid);
+	void HandleChanageCharactetList(bool Isadd, FLobbySlotInfo& Info);
+	FLobbySlotInfo*			FindCharacterInfo(int32 CharacterId);
+	const FLobbySlotInfo*	FindCharacterInfoBySlotIndex(int32 InSlotIndex) const;
 
 	UFUNCTION()
-	void HandleCharacterClicked(FGuid ClickedCharacterId);
+	void HandleCharacterClicked(int32 ClickedCharacterId);
 
 public:
 	// ═════════════════════
@@ -63,10 +60,9 @@ protected:
 	TSubclassOf<AJ1LobbyCharacterActor> CharacterActorClass;
 
 	UPROPERTY(EditAnywhere, Category = "Lobby|Layout")
-	int32 MaxVisibleCount = 5;
+	int32 TotalCharacterSlotCount = 5;
 
 	UPROPERTY()	TArray<FLobbySlotInfo> CharacterList;
 	UPROPERTY()	TArray<TObjectPtr<AJ1LobbyCharacterActor>> PooledActors;
-	UPROPERTY()	int32 CurrentPage = 0;
-	UPROPERTY()	FGuid SelectedCharacterID;
+	UPROPERTY()	int32 SelectedSlotIdx = INDEX_NONE;
 };

@@ -2,6 +2,7 @@
 
 #include "UI/Customizing/J1CustomizingWidget.h"
 #include "J1SkinSelectWidget.h"
+#include "J1GameInstance.h"
 #include "Character/PC/J1CustomizePreviewActor.h"
 #include "Components/Button.h"
 #include "Components/EditableTextBox.h"
@@ -10,6 +11,7 @@
 #include "Engine/DataTable.h"
 #include "Kismet/GameplayStatics.h"
 #include "Internationalization/Regex.h"
+#include "Network/Protocol/LobbyProtocol.pb.h"
 
 void UJ1CustomizingWidget::NativeConstruct()
 {
@@ -36,8 +38,8 @@ void UJ1CustomizingWidget::NativeConstruct()
 	}
 
 	// 생성/캔슬 버튼 바인딩
-	if (Btn_Create)		Btn_Create->OnClicked.AddDynamic(this, &UJ1CustomizingWidget::OnConfirmClicked);
-	if (Btn_Cancle)		Btn_Cancle->OnClicked.AddDynamic(this, &UJ1CustomizingWidget::OnBackClicked);
+	if (Btn_Create)		Btn_Create->OnClicked.AddDynamic(this, &UJ1CustomizingWidget::OnCreateClicked);
+	if (Btn_Cancle)		Btn_Cancle->OnClicked.AddDynamic(this, &UJ1CustomizingWidget::OnCancleClicked);
 
 	// 씬에서 프리뷰 액터 자동 탐색
 	if (!PreviewActor)
@@ -142,8 +144,8 @@ void UJ1CustomizingWidget::OnBackClicked()
 
 void UJ1CustomizingWidget::OnCreateClicked()
 {
-	// TODO
 	FString Nickname = EditableText_Nickname->GetText().ToString();
+	std::string name(TCHAR_TO_UTF8(*Nickname));
 
 	// 결과 서버 전달(별도 UI 만들 필요 존재)
 	FCharacterCustomizeResult Result;
@@ -153,10 +155,36 @@ void UJ1CustomizingWidget::OnCreateClicked()
 	Result.LowerSkinIndex = WBP_SkinSelect_Lower ? WBP_SkinSelect_Lower->GetCurrentIndex() : 0;
 	Result.WeaponSkinIndex = WBP_SkinSelect_Weapon ? WBP_SkinSelect_Weapon->GetCurrentIndex() : 0;
 
-	// 서버 결과 전달
+	// 서버 결과 전달 
 
-	// TODO 캐릭 선택창으로 
-	UGameplayStatics::OpenLevel(GetWorld(), FName("L_Login"));
+	if (UJ1GameInstance* GI = GetGameInstance<UJ1GameInstance>())
+	{
+		// Local로 추가하고 서버 결과에따라 삭제
+		FLobbySlotInfo AddedCharacter;
+		AddedCharacter.SlotIndex = GI->GetCurrentCharacterNum() + 1;
+		AddedCharacter.ClassType = CurrentClass;
+		AddedCharacter.CharacterName = Nickname;
+		AddedCharacter.Level = 1;
+		AddedCharacter.UpperBodySkinRowID = WBP_SkinSelect_Upper ? WBP_SkinSelect_Upper->GetCurrentIndex() : 0;
+		AddedCharacter.LowerBodySkinRowID = WBP_SkinSelect_Lower ? WBP_SkinSelect_Lower->GetCurrentIndex() : 0;
+		AddedCharacter.WeaponSkinRowID = WBP_SkinSelect_Weapon ? WBP_SkinSelect_Weapon->GetCurrentIndex() : 0;
+
+		GI->OnLobbyListChange.Broadcast(true, AddedCharacter);
+
+
+		Game::REQ_CREATE_CHARACTER createPkt;
+		createPkt.set_account_id(GetGameInstance<UJ1GameInstance>()->GetUserid());
+
+		Game::LobbyCharacterInfo* temp = createPkt.add_characters();
+		temp->set_slot_id(AddedCharacter.SlotIndex);
+		temp->set_name(name);
+		temp->set_classtype(static_cast<int32>(CurrentClass));
+		temp->set_upperskinid(AddedCharacter.UpperBodySkinRowID);
+		temp->set_lowerskinid(AddedCharacter.LowerBodySkinRowID);
+		temp->set_weaponskinid(AddedCharacter.WeaponSkinRowID);
+
+		SEND_PACKET(GI, ESessionType::Game, Game::PacketType::PKT_REQ_CREATE_CHARACTER, createPkt);
+	}
 }
 
 void UJ1CustomizingWidget::OnCancleClicked()

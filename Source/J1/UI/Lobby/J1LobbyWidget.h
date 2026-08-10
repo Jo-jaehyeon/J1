@@ -30,7 +30,6 @@ public:
 protected:
 	UFUNCTION()	void HandleStartGameClicked();
 	UFUNCTION()	void HandleDeleteCharacterClicked();
-	UFUNCTION()	void HandleCreateCharacterClicked();
 	UFUNCTION()	void HandleSelectionChanged(bool bHasValidSelection);
 
 private:
@@ -44,7 +43,6 @@ protected:
 	UPROPERTY(meta = (BindWidget))  TObjectPtr<UTextBlock>	 Txt_Notice;
 	UPROPERTY(meta = (BindWidget))	TObjectPtr<UButton>		 Btn_StartGame;
 	UPROPERTY(meta = (BindWidget))	TObjectPtr<UButton>		 Btn_DeleteCharacter;
-	UPROPERTY(meta = (BindWidget))	TObjectPtr<UButton>		 Btn_CreateCharacter;
 
 	UPROPERTY()						TObjectPtr<UJ1LobbyDisplayManager> DisplayManager;
 

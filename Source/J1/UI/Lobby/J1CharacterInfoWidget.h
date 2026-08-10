@@ -26,13 +26,15 @@ protected:
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Lobby")
-	void SetData(const FGuid& InCharacterId, const FString& InName, ECharacterClass InClass, int32 InLevel);
+	void SetFilledData(int32 InCharacterId, const FString& InName, ECharacterClass InClass, int32 InLevel);
+	UFUNCTION(BlueprintCallable, Category = "Lobby")
+	void SetEmptyData(int32 InSlotIndex);
 
 	UFUNCTION(BlueprintCallable, Category = "Lobby")
 	void SetSelectedStyle(bool bSelected);
 
 	UFUNCTION(BlueprintPure, Category = "Lobby")
-	FGuid GetCharacterUniqueID() const { return CharacterUniqueID; }
+	int32 GetCharacterUniqueID() const { return CharacterUniqueID; }
 
 protected:
 	UFUNCTION()
@@ -41,6 +43,9 @@ protected:
 	FText GetClassDisplayName(ECharacterClass InClass) const;
 
 public:
+	// ═════════════════════
+	//		 DELEGATE
+	// ═════════════════════
 	UPROPERTY(BlueprintAssignable, Category = "Lobby")
 	FOnCharacterInfoClicked OnWidgetClicked;
 
@@ -54,6 +59,8 @@ protected:
 	UPROPERTY(meta = (BindWidget))	TObjectPtr<UTextBlock>	Txt_Level;
 	UPROPERTY(meta = (BindWidget))	TObjectPtr<UImage>		Img_SelectedCheck;
 
+	int32 CharacterUniqueID = INDEX_NONE;
+	int32 SlotIndex = INDEX_NONE;
 
-	FGuid CharacterUniqueID;
+	bool bIsEmptyState = false;
 };

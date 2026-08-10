@@ -7,5 +7,8 @@
 #endif
 
 bool Handle_RES_CHARACTER_LIST(SessionPtr& session, Game::RES_CHARACTER_LIST& pkt);
+bool Handle_RES_CHECK_NICKNAME(SessionPtr& session, Game::RES_CHECK_NICKNAME& pkt);
+bool Handle_RES_CREATE_CHARACTER(SessionPtr& session, Game::RES_CREATE_CHARACTER& pkt);
+bool Handle_RES_DELETE_CHARACTER(SessionPtr& session, Game::RES_DELETE_CHARACTER& pkt);
 bool Handle_RES_ENTER_GAME(SessionPtr& session, Game::RES_ENTER_GAME& pkt);
 bool Handle_RES_LEAVE_GAME(SessionPtr& session, Game::RES_LEAVE_GAME& pkt);

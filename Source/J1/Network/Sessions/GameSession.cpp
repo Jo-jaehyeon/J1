@@ -27,7 +27,11 @@ void GameSession::OnConnect(const boost::system::error_code& err)
 {
 	if (!err)
 	{
+		AsyncRead();
+
 		UJ1GameInstance* GI = GetGameInstance();
+		SetPlayerId(GI->GetUserid());
+
 		Game::REQ_CHECK_TOKENVALID checkPkt;
 		checkPkt.set_id(GI->GetUserid());
 		checkPkt.set_token(GI->GetLoginToken());
@@ -35,8 +39,6 @@ void GameSession::OnConnect(const boost::system::error_code& err)
 		SEND_PACKET(GI, ESessionType::Game, Game::PacketType::PKT_REQ_CHECK_TOKENVALID, checkPkt);
 
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Connection Success~")));
-		
-		AsyncRead();
 	}
 	else
 	{

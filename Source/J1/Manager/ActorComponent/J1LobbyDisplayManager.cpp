@@ -47,13 +47,21 @@ void UJ1LobbyDisplayManager::SetMaxSlotCount(int32 InMaxSlotCount)
 
 void UJ1LobbyDisplayManager::OnClickStartGame()
 {
-	if (const FLobbySlotInfo* Info = FindCharacterInfo(SelectedSlotIdx))
+	if (FLobbySlotInfo* Info = FindCharacterInfoBySlotIndex(SelectedSlotIdx))
 	{
-		FString Name = Info->CharacterName;
-		GetOwner()->GetGameInstance<UJ1GameInstance>()->OnNotice.Broadcast(Name);
+		if(UJ1GameInstance * GI = GetOwner()->GetGameInstance<UJ1GameInstance>())
+		{
+			GI->ConnectToServer(ESessionType::Chat);
+			GI->SetGetCharacterInfo(*Info);
 
-		
-		// TODO 게임 입장 패킷 전송
+			// Game 접속 요청 패킷
+			Game::REQ_ENTER_GAME enterPkt;
+			std::string sender = std::string(TCHAR_TO_UTF8(*(GI->GetCharacterInfo().CharacterName)));
+			enterPkt.set_player_id(GI->GetUserid());
+			enterPkt.set_name(sender);
+
+			SEND_PACKET(GI, ESessionType::Game, Game::PacketType::PKT_REQ_ENTER_GAME, enterPkt);
+		}
 	}
 }
 
@@ -177,7 +185,7 @@ FLobbySlotInfo* UJ1LobbyDisplayManager::FindCharacterInfo(int32 CharacterId)
 		});
 }
 
-const FLobbySlotInfo* UJ1LobbyDisplayManager::FindCharacterInfoBySlotIndex(int32 InSlotIndex) const
+FLobbySlotInfo* UJ1LobbyDisplayManager::FindCharacterInfoBySlotIndex(int32 InSlotIndex)
 {
 	return CharacterList.FindByPredicate([InSlotIndex](const FLobbySlotInfo& C)
 	{

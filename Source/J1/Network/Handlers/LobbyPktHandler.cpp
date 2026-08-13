@@ -100,7 +100,24 @@ bool Handle_RES_DELETE_CHARACTER(SessionPtr& session, Game::RES_DELETE_CHARACTER
 
 bool Handle_RES_ENTER_GAME(SessionPtr& session, Game::RES_ENTER_GAME& pkt)
 {
-	return false;
+	bool result = pkt.result();
+
+	AsyncTask(ENamedThreads::GameThread, [session, result]()
+	{
+		if (auto* GI = Cast<UJ1GameInstance>(session->GetGameInstance()))
+		{
+			if (result)
+			{
+				UGameplayStatics::OpenLevel(GI, FName("DevMap"));
+			}
+			else
+			{
+				// TODO 접속 실패 로그
+			}
+		}
+	});
+
+	return true;
 }
 
 bool Handle_RES_LEAVE_GAME(SessionPtr& session, Game::RES_LEAVE_GAME& pkt)

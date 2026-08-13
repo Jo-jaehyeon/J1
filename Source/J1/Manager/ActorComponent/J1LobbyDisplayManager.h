@@ -34,13 +34,13 @@ public:
 	bool HasValidSelection() const { return SelectedSlotIdx != INDEX_NONE; }
 
 protected:
-	void EnsureActorPool();
-	void RefreshSlots();
-	void AddCharacterLocally(FLobbySlotInfo& Info);
-	void RemoveCharacterLocally(const int32& characterid);
-	void HandleChanageCharactetList(bool Isadd, FLobbySlotInfo& Info);
+	void					EnsureActorPool();
+	void					RefreshSlots();
+	void					AddCharacterLocally(FLobbySlotInfo& Info);
+	void					RemoveCharacterLocally(const int32& characterid);
+	void					HandleChanageCharactetList(bool Isadd, FLobbySlotInfo& Info);
 	FLobbySlotInfo*			FindCharacterInfo(int32 CharacterId);
-	const FLobbySlotInfo*	FindCharacterInfoBySlotIndex(int32 InSlotIndex) const;
+	FLobbySlotInfo*			FindCharacterInfoBySlotIndex(int32 InSlotIndex);
 
 	UFUNCTION()
 	void HandleCharacterClicked(int32 ClickedCharacterId);

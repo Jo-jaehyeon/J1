@@ -161,7 +161,6 @@ void UJ1LoginWidget::OnResultLogin(ELoginMode loginMode, bool result)
 			{
 				GI->RequestDisconnect(ESessionType::Login);
 				GI->ConnectToServer(ESessionType::Game);
-				//GI->ConnectToServer(ESessionType::Chat);
 			}
 			else
 			{

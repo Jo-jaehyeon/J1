@@ -48,6 +48,9 @@ public:
 	int32 GetCurrentLobbySlot() { return CurrentLobbySlot; }
 	void SetCurrentLobbySlot(int32 InSlotIndex) { CurrentLobbySlot = InSlotIndex; }
 	
+	FLobbySlotInfo GetCharacterInfo() { return CurrentCharacterInfo; }
+	void SetGetCharacterInfo(FLobbySlotInfo _CharacterInfo) { CurrentCharacterInfo = _CharacterInfo; }
+	
 public:
 	// ═════════════════════
 	//		 DELEGATE
@@ -71,4 +74,6 @@ private:
 
 	int			_userid;
 	std::string _token;
+
+	FLobbySlotInfo CurrentCharacterInfo;
 };

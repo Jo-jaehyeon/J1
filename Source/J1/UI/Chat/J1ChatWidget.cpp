@@ -24,6 +24,7 @@ void UJ1ChatWidget::NativeConstruct()
 	// Binding
 	UJ1GameInstance* GI = Cast<UJ1GameInstance>(GWorld->GetGameInstance());
 	GI->OnChatReceived.AddUObject(this, &UJ1ChatWidget::OnChatReceived);
+	sender = std::string(TCHAR_TO_UTF8(*(GI->GetCharacterInfo().CharacterName)));
 }
 
 void UJ1ChatWidget::NativeDestruct()
@@ -69,8 +70,7 @@ void UJ1ChatWidget::SendText(const FText& Text)
 		Now.GetMinute());
 	std::string str_Time = std::string(TCHAR_TO_UTF8(*Time));
 	ChatPkt.set_time(str_Time);
-
-	ChatPkt.set_sender("admin");
+	ChatPkt.set_sender(sender);
 
 	FString fstr_msg = Text.ToString();
 	std::string str_msg = std::string(TCHAR_TO_UTF8(*fstr_msg));
@@ -80,7 +80,7 @@ void UJ1ChatWidget::SendText(const FText& Text)
 }
 
 // ════════════════════════════════════
-//  채팅 관련 함수
+//			채팅 관련 함수
 // ════════════════════════════════════
 void UJ1ChatWidget::OnChatReceived(const FString& Time, const FString& Sender, const FString& Message)
 {

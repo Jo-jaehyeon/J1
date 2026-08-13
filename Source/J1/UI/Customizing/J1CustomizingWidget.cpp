@@ -48,6 +48,11 @@ void UJ1CustomizingWidget::NativeConstruct()
 		PreviewActor = Cast<AJ1CustomizePreviewActor>(Found);
 	}
 
+	if (UJ1GameInstance* GI = Cast<UJ1GameInstance>(GetGameInstance()))
+	{
+		GI->OnCheckNickName.AddUObject(this, &UJ1CustomizingWidget::HandleCheckNickName);
+	}
+
 	// 기본 전사 적용
 	ApplyClass(ECharacterClass::Warrior);
 }
@@ -123,14 +128,24 @@ void UJ1CustomizingWidget::OnConfirmClicked()
 	}
 
 	// 중복되지 않은 닉네임인지 체크
-	// TODO : 서버파트
-	// else if()
-	// {
-	//		Txt_Notice->SetVisibility(ESlateVisibility::Visible);
-	//		Txt_Notice->SetText(FText::FromString(TEXT("누군가 사용중인 닉네임입니다.")));
-	// }
+	Game::REQ_CHECK_NICKNAME namePkt;
+	namePkt.set_name(TCHAR_TO_UTF8(*Nickname));
+
+	SEND_PACKET(GetGameInstance<UJ1GameInstance>(), ESessionType::Game, Game::PacketType::PKT_REQ_CHECK_NICKNAME, namePkt);
+}
+
+void UJ1CustomizingWidget::HandleCheckNickName(bool check)
+{
+	if(check)
+	{
+		// true -> 동일 닉네임 O
+		Txt_Notice->SetVisibility(ESlateVisibility::Visible);
+		Txt_Notice->SetText(FText::FromString(TEXT("누군가 사용중인 닉네임입니다.")));
+	}
 	else
 	{
+		// false -> 동일 닉네임 X
+		FString Nickname = EditableText_Nickname ? EditableText_Nickname->GetText().ToString() : TEXT("");
 		Txt_Check->SetText(FText::FromString(Nickname));
 		Txt_Notice->SetVisibility(ESlateVisibility::Hidden);
 		Widget_PopUp->SetVisibility(ESlateVisibility::Visible);
@@ -161,7 +176,7 @@ void UJ1CustomizingWidget::OnCreateClicked()
 	{
 		// Local로 추가하고 서버 결과에따라 삭제
 		FLobbySlotInfo AddedCharacter;
-		AddedCharacter.SlotIndex = GI->GetCurrentCharacterNum() + 1;
+		AddedCharacter.SlotIndex = GI->GetCurrentLobbySlot();
 		AddedCharacter.ClassType = CurrentClass;
 		AddedCharacter.CharacterName = Nickname;
 		AddedCharacter.Level = 1;
@@ -189,5 +204,5 @@ void UJ1CustomizingWidget::OnCreateClicked()
 
 void UJ1CustomizingWidget::OnCancleClicked()
 {
-	Txt_Notice->SetVisibility(ESlateVisibility::Hidden);
+	Widget_PopUp->SetVisibility(ESlateVisibility::Hidden);
 }

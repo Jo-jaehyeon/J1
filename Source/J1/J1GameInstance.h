@@ -12,7 +12,9 @@
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnChatReceived, const FString&, const FString&, const FString&);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnLoginResult, ELoginMode, bool);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnNotice, FString);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnCheckNickName, bool);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnLobbyListChange, bool, FLobbySlotInfo&);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnLobbyListSet, const TArray<FLobbySlotInfo>&);
 
 UCLASS()
 class J1_API UJ1GameInstance : public UGameInstance
@@ -43,8 +45,8 @@ private:
 
 	// Lobby & Customize
 public:
-	int32 GetCurrentCharacterNum() { return CurrentCharacterNum; }
-	void SetCurrentCharacterNum(int32 InSlotIndex) { CurrentCharacterNum = InSlotIndex; }
+	int32 GetCurrentLobbySlot() { return CurrentLobbySlot; }
+	void SetCurrentLobbySlot(int32 InSlotIndex) { CurrentLobbySlot = InSlotIndex; }
 	
 public:
 	// ═════════════════════
@@ -53,11 +55,13 @@ public:
 	FOnChatReceived		OnChatReceived;
 	FOnLoginResult		OnLoginResult;
 	FOnNotice			OnNotice;
+	FOnCheckNickName	OnCheckNickName;
 	FOnLobbyListChange  OnLobbyListChange;
+	FOnLobbyListSet		OnLobbyListSet;
 
 protected:
 	UPROPERTY()
-	int32 CurrentCharacterNum = INDEX_NONE;
+	int32 CurrentLobbySlot = INDEX_NONE;
 
 private:
 	SessionPtr loginSession;

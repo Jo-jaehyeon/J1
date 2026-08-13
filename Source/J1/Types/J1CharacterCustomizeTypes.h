@@ -9,9 +9,9 @@
 UENUM(BlueprintType)
 enum class ECharacterClass : uint8
 {
-    Warrior   UMETA(DisplayName = "전사"),
-    Archer    UMETA(DisplayName = "궁수"),
-    Assassin     UMETA(DisplayName = "도적"),
+    Warrior         UMETA(DisplayName = "Warrior"),
+    Archer          UMETA(DisplayName = "Archer"),
+    Assassin        UMETA(DisplayName = "Assassin"),
 };
 
 
@@ -21,9 +21,9 @@ enum class ECharacterClass : uint8
 UENUM(BlueprintType)
 enum class ESkinSlot : uint8
 {
-    Upper  UMETA(DisplayName = "상체"),
-    Lower  UMETA(DisplayName = "하체"),
-    Weapon UMETA(DisplayName = "무기"),
+    Upper           UMETA(DisplayName = "상체"),
+    Lower           UMETA(DisplayName = "하체"),
+    Weapon          UMETA(DisplayName = "무기"),
 };
 
 
@@ -49,28 +49,25 @@ struct FCharacterSkinBaseData : public FTableRowBase
 {
     GENERATED_BODY()
 
-    /** 표시 이름 */
     UPROPERTY(EditAnywhere, BlueprintReadOnly) FText                          DisplayName;
-
-    /* 설명 텍스트 */
     UPROPERTY(EditAnywhere, BlueprintReadOnly) FText                          Description;
-
-    /* 클래스 스켈레탈 메시 */
     UPROPERTY(EditAnywhere, BlueprintReadOnly) TSoftObjectPtr<USkeletalMesh>  SkeletalMesh;
-
-    /* 클래스 애님 블루프린트 */
     UPROPERTY(EditAnywhere, BlueprintReadOnly) TSoftClassPtr<UAnimInstance>   AnimBlueprint;
-
-    /* 상체 스킨 목록 */
+    
+    // Skin Material
     UPROPERTY(EditAnywhere, BlueprintReadOnly) TArray<FSkinEntry>             UpperSkins;
-
-    /** 하체 스킨 목록 */
     UPROPERTY(EditAnywhere, BlueprintReadOnly) TArray<FSkinEntry>             LowerSkins;
-
-    /** 무기 스킨 목록 */
     UPROPERTY(EditAnywhere, BlueprintReadOnly) TArray<FSkinEntry>             WeaponSkins;
 
-    /** 슬롯 열거형(읽기 편의용) */
+
+    // ────────────────────────
+    //    Material별로 적용해야 하는 인덱스 목록.
+    // ────────────────────────
+    UPROPERTY(EditAnywhere, BlueprintReadOnly) TArray<int32>                  UpperMaterialSlotIndices;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly) TArray<int32>                  LowerMaterialSlotIndices;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly) TArray<int32>                  WeaponMaterialSlotIndices;
+
+    // 슬롯 열거형(읽기 편의용) 
     const TArray<FSkinEntry>* GetSkinsForSlot(ESkinSlot Slot) const
     {
         switch (Slot)
@@ -78,6 +75,16 @@ struct FCharacterSkinBaseData : public FTableRowBase
         case ESkinSlot::Upper:  return &UpperSkins;
         case ESkinSlot::Lower:  return &LowerSkins;
         case ESkinSlot::Weapon: return &WeaponSkins;
+        default:                return nullptr;
+        }
+    }
+    const TArray<int32>* GetMaterialSlotIndicesForSlot(ESkinSlot Slot) const
+    {
+        switch (Slot)
+        {
+        case ESkinSlot::Upper:  return &UpperMaterialSlotIndices;
+        case ESkinSlot::Lower:  return &LowerMaterialSlotIndices;
+        case ESkinSlot::Weapon: return &WeaponMaterialSlotIndices;
         default:                return nullptr;
         }
     }
@@ -97,4 +104,26 @@ struct FCharacterCustomizeResult
     UPROPERTY(BlueprintReadWrite) int32           LowerSkinIndex = 0;
     UPROPERTY(BlueprintReadWrite) int32           WeaponSkinIndex = 0;
  
+};
+
+// ───────────────────────
+//           로비 캐릭터를 구성하는 데이터 
+// ───────────────────────
+USTRUCT(BlueprintType)
+struct FLobbySlotInfo
+{
+    GENERATED_BODY()
+
+    // 서버에서 캐릭터를 식별하기 위한 고유 ID.
+    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  int64 CharacterUniqueID = INDEX_NONE;
+    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  int64 SlotIndex = 0;
+
+    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  ECharacterClass ClassType = ECharacterClass::Warrior;
+    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  FString CharacterName;
+    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  int64 Level = 1;
+
+    // DT_SkinMaterial의 Material index
+    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  int64 UpperBodySkinRowID;
+    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  int64 LowerBodySkinRowID;
+    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  int64 WeaponSkinRowID;
 };

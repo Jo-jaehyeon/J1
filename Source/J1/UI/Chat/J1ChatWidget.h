@@ -59,6 +59,7 @@ public:
 
 private:
     EChatChannel ActiveChannel = EChatChannel::All;
+    std::string sender = "admin";
 
 public:
     // ════════════════════════════════════

@@ -6,11 +6,15 @@
 #include "Engine/GameInstance.h"
 #include "J1.h"
 #include "Types/J1EnumTypes.h"
+#include "Types/J1CharacterCustomizeTypes.h"
 #include "J1GameInstance.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnChatReceived, const FString&, const FString&, const FString&);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnLoginResult, ELoginMode, bool);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnNotice, FString);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnCheckNickName, bool);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnLobbyListChange, bool, FLobbySlotInfo&);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnLobbyListSet, const TArray<FLobbySlotInfo>&);
 
 UCLASS()
 class J1_API UJ1GameInstance : public UGameInstance
@@ -39,14 +43,28 @@ public:
 private:
 	SessionPtr FindTargetSession(ESessionType sessionType);
 
-
+	// Lobby & Customize
+public:
+	int32 GetCurrentLobbySlot() { return CurrentLobbySlot; }
+	void SetCurrentLobbySlot(int32 InSlotIndex) { CurrentLobbySlot = InSlotIndex; }
+	
+	FLobbySlotInfo GetCharacterInfo() { return CurrentCharacterInfo; }
+	void SetGetCharacterInfo(FLobbySlotInfo _CharacterInfo) { CurrentCharacterInfo = _CharacterInfo; }
+	
 public:
 	// ═════════════════════
 	//		 DELEGATE
 	// ═════════════════════
-	FOnChatReceived OnChatReceived;
-	FOnLoginResult	OnLoginResult;
-	FOnNotice		OnNotice;
+	FOnChatReceived		OnChatReceived;
+	FOnLoginResult		OnLoginResult;
+	FOnNotice			OnNotice;
+	FOnCheckNickName	OnCheckNickName;
+	FOnLobbyListChange  OnLobbyListChange;
+	FOnLobbyListSet		OnLobbyListSet;
+
+protected:
+	UPROPERTY()
+	int32 CurrentLobbySlot = INDEX_NONE;
 
 private:
 	SessionPtr loginSession;
@@ -56,4 +74,6 @@ private:
 
 	int			_userid;
 	std::string _token;
+
+	FLobbySlotInfo CurrentCharacterInfo;
 };

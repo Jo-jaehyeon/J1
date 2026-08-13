@@ -9,8 +9,10 @@
 /*
  *      Forward Declaration
  */
-class USizeBox;
+class UOverlay;
 class UTextBlock;
+class UButton;
+class UJ1LobbyDisplayManager;
 
 UCLASS()
 class J1_API UJ1LobbyWidget : public UUserWidget
@@ -21,14 +23,29 @@ protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 
+public:
+	UFUNCTION(BlueprintCallable, Category = "Lobby")
+	void SetDisplayManager(UJ1LobbyDisplayManager* InManager);
+
+protected:
+	UFUNCTION()	void HandleStartGameClicked();
+	UFUNCTION()	void HandleDeleteCharacterClicked();
+	UFUNCTION()	void HandleSelectionChanged(bool bHasValidSelection);
+
 private:
 	void OnNotice(FString text);
 
-public:
+protected:
 	// ════════════════════════════════════
 	//              UMG 바인딩
 	// ════════════════════════════════════
-	UPROPERTY(meta = (BindWidget))  USizeBox*	SizeBox_Notice;
-	UPROPERTY(meta = (BindWidget))  UTextBlock* Txt_Notice;
-	
+	UPROPERTY(meta = (BindWidget))  TObjectPtr<UOverlay>	 Overlay_Notice;
+	UPROPERTY(meta = (BindWidget))  TObjectPtr<UTextBlock>	 Txt_Notice;
+	UPROPERTY(meta = (BindWidget))	TObjectPtr<UButton>		 Btn_StartGame;
+	UPROPERTY(meta = (BindWidget))	TObjectPtr<UButton>		 Btn_DeleteCharacter;
+
+	UPROPERTY()			TObjectPtr<UJ1LobbyDisplayManager>	 DisplayManager;
+
+	UPROPERTY()
+	FTimerHandle PopupVisibilityTimerHandle;
 };

@@ -50,6 +50,8 @@ private:
 
     // 최종 버튼 콜백
     UFUNCTION() void OnConfirmClicked();
+    void HandleCheckNickName(bool check);
+
     UFUNCTION() void OnBackClicked();
     UFUNCTION() void OnCreateClicked();
     UFUNCTION() void OnCancleClicked();

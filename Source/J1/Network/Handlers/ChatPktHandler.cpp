@@ -12,11 +12,9 @@ bool Handle_Chat_INVALID(SessionPtr& session, boost::asio::mutable_buffer& buffe
 bool Handle_RES_ENTER_CHATROOM(SessionPtr& session, Chat::RES_ENTER_CHATROOM& pkt)
 {
 	bool success = pkt.result();
-	int playerId = pkt.player_id();
-	AsyncTask(ENamedThreads::GameThread, [success, session, playerId]() {
+	AsyncTask(ENamedThreads::GameThread, [success, session]() {
 		if (success)
 		{
-			session->SetPlayerId(playerId);
 			UE_LOG(LogTemp, Log, TEXT("Enter ChatRoom Success~"));
 		}
 		else

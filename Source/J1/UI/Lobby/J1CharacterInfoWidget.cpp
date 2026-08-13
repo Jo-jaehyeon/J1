@@ -71,13 +71,13 @@ void UJ1CharacterInfoWidget::SetSelectedStyle(bool bSelected)
 
 void UJ1CharacterInfoWidget::HandleButtonClicked()
 {
+	OnWidgetClicked.Broadcast();
+
 	if (bIsEmptyState)
 	{
 		UGameplayStatics::OpenLevel(this, "L_Customize");
 		return;
 	}
-	
-	OnWidgetClicked.Broadcast();
 }
 
 FText UJ1CharacterInfoWidget::GetClassDisplayName(ECharacterClass InClass) const

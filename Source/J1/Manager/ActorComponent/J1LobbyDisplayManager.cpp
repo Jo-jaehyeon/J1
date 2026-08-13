@@ -19,6 +19,7 @@ void UJ1LobbyDisplayManager::BeginPlay()
 	if (UJ1GameInstance* GI = GetOwner()->GetGameInstance<UJ1GameInstance>())
 	{
 		GI->OnLobbyListChange.AddUObject(this, &UJ1LobbyDisplayManager::HandleChanageCharactetList);
+		GI->OnLobbyListSet.AddUObject(this, &UJ1LobbyDisplayManager::SetCharacterList);
 	}
 }
 
@@ -196,6 +197,8 @@ void UJ1LobbyDisplayManager::HandleCharacterClicked(int32 ClickedSlotId)
 			SlotActor->SetSelected(SlotActor->GetCharacterSlotIdx() == SelectedSlotIdx);
 		}
 	}
+	if (UJ1GameInstance* GI = Cast<UJ1GameInstance>(GetOwner()->GetGameInstance()))
+		GI->SetCurrentLobbySlot(SelectedSlotIdx);
 
 	OnSelectionChanged.Broadcast(HasValidSelection());
 }

@@ -156,7 +156,7 @@ void UJ1LoginWidget::OnResultLogin(ELoginMode loginMode, bool result)
 		if (result)
 		{
 			UGameplayStatics::OpenLevel(GetWorld(), FName("L_Lobby"));
-			// TODO	: 게임 접속 시도
+			
 			if (auto* GI = GetGameInstance<UJ1GameInstance>())
 			{
 				GI->RequestDisconnect(ESessionType::Login);

@@ -22,11 +22,10 @@ void UJ1LobbyWidget::NativeConstruct()
 	// 선택된 캐릭터가 없을 때는 두 버튼 모두 비활성화
 	HandleSelectionChanged(false);	
 
-	// 로그인 검증 및 캐릭터 목록 요구 패킷 발송
+	// 캐릭터 목록 요구 패킷 발송
 	Game::REQ_CHARACTER_LIST charLIST_Pkt;
 	
-	charLIST_Pkt.set_id(GI->GetUserid());
-	charLIST_Pkt.set_token(GI->GetLoginToken());
+	charLIST_Pkt.set_id(GI->GetUserid()); 
 
 	SEND_PACKET(GetGameInstance<UJ1GameInstance>(), ESessionType::Game, Game::PacketType::PKT_REQ_CHARACTER_LIST, charLIST_Pkt);
 }

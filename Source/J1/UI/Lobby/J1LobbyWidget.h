@@ -44,7 +44,7 @@ protected:
 	UPROPERTY(meta = (BindWidget))	TObjectPtr<UButton>		 Btn_StartGame;
 	UPROPERTY(meta = (BindWidget))	TObjectPtr<UButton>		 Btn_DeleteCharacter;
 
-	UPROPERTY()						TObjectPtr<UJ1LobbyDisplayManager> DisplayManager;
+	UPROPERTY()			TObjectPtr<UJ1LobbyDisplayManager>	 DisplayManager;
 
 	UPROPERTY()
 	FTimerHandle PopupVisibilityTimerHandle;

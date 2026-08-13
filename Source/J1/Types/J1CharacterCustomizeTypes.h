@@ -115,15 +115,15 @@ struct FLobbySlotInfo
     GENERATED_BODY()
 
     // 서버에서 캐릭터를 식별하기 위한 고유 ID.
-    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  int32 CharacterUniqueID = INDEX_NONE;
-    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  int32 SlotIndex = 0;
+    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  int64 CharacterUniqueID = INDEX_NONE;
+    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  int64 SlotIndex = 0;
 
     UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  ECharacterClass ClassType = ECharacterClass::Warrior;
     UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  FString CharacterName;
-    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  int32 Level = 1;
+    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  int64 Level = 1;
 
     // DT_SkinMaterial의 Material index
-    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  int32 UpperBodySkinRowID;
-    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  int32 LowerBodySkinRowID;
-    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  int32 WeaponSkinRowID;
+    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  int64 UpperBodySkinRowID;
+    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  int64 LowerBodySkinRowID;
+    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  int64 WeaponSkinRowID;
 };

@@ -6,6 +6,7 @@
 #include "J1.h"
 #endif
 
+bool Handle_RES_CHECK_TOKENVALID(SessionPtr& session, Game::RES_CHECK_TOKENVALID& pkt);
 bool Handle_RES_CHARACTER_LIST(SessionPtr& session, Game::RES_CHARACTER_LIST& pkt);
 bool Handle_RES_CHECK_NICKNAME(SessionPtr& session, Game::RES_CHECK_NICKNAME& pkt);
 bool Handle_RES_CREATE_CHARACTER(SessionPtr& session, Game::RES_CREATE_CHARACTER& pkt);

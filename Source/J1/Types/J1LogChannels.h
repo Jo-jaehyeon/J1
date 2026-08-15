@@ -1,0 +1,14 @@
+﻿#pragma once
+
+#include "Containers/UnrealString.h"
+#include "Logging/LogMacros.h"
+
+J1_API DECLARE_LOG_CATEGORY_EXTERN(SystemLog, All, All);
+J1_API DECLARE_LOG_CATEGORY_EXTERN(CreatureLog, Log, All);
+J1_API DECLARE_LOG_CATEGORY_EXTERN(PlayerLog, Log, All);
+J1_API DECLARE_LOG_CATEGORY_EXTERN(MonsterLog, Log, All);
+J1_API DECLARE_LOG_CATEGORY_EXTERN(WarriorLog, Log, All);
+J1_API DECLARE_LOG_CATEGORY_EXTERN(AssassinLog, Log, All);
+J1_API DECLARE_LOG_CATEGORY_EXTERN(ArchorLog, Log, All);
+J1_API DECLARE_LOG_CATEGORY_EXTERN(ArrowLog, Log, All);
+J1_API DECLARE_LOG_CATEGORY_EXTERN(ItemLog, Log, All);

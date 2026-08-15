@@ -5,6 +5,7 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 AJ1Player::AJ1Player() : Super()
 {
@@ -26,9 +27,6 @@ AJ1Player::AJ1Player() : Super()
 	GetCharacterMovement()->MaxWalkSpeed = 600.f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
-
-	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
 
 	// CameraBoom
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -70,11 +68,39 @@ void AJ1Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AJ1Player::Move(const FInputActionValue& Value)
 {
-	UE_LOG(LogTemp, Log, TEXT("Move is Clicked"));
+	FVector2D MovementVector = Value.Get<FVector2D>();
+
+	const FRotator Rotation = Controller->GetControlRotation();
+	const FRotator CameraRotation = FollowCamera->GetComponentRotation();
+
+	const FRotator YawRotation(0, Rotation.Yaw, 0);
+	const FRotator CameraYawRotation(0, CameraRotation.Yaw, 0);
+
+	const FVector ForwardDirection = FRotationMatrix(CameraYawRotation).GetUnitAxis(EAxis::X);
+	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+	AddMovementInput(ForwardDirection, MovementVector.X);
+	AddMovementInput(RightDirection, MovementVector.Y);
+
+	//if (isMyPlayer)
+	//{
+	//	SetMoveState(message::MOVE_STATE_RUN);
+	//	DesiredInput = MovementVector;
+	//
+	//	DesiredMoveDirection = FVector::ZeroVector;
+	//	DesiredMoveDirection += ForwardDirection * MovementVector.Y;
+	//	DesiredMoveDirection += RightDirection * MovementVector.X;
+	//	DesiredMoveDirection.Normalize();
+	//
+	//	const FVector Location = GetActorLocation();
+	//
+	//	FRotator Rotator = UKismetMathLibrary::FindLookAtRotation(Location, Location + DesiredMoveDirection);
+	//	DesiredYaw = Rotator.Yaw;
+	//}
 }
 
 void AJ1Player::Look(const FInputActionValue& Value)
 {
-	UE_LOG(LogTemp, Log, TEXT("Look is Clicked"));
+	
 }
 

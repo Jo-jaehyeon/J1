@@ -29,7 +29,7 @@ public:
 	virtual void Look(const FInputActionValue& Value);
 
 public:
-	void SetMyPlayer(bool _isMyPlayer) { isMyplayer = _isMyPlayer; }
+	void SetMyPlayer(bool _isMyPlayer) { isMyPlayer = _isMyPlayer; }
 
 
 	/*
@@ -40,5 +40,5 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Camera")	TObjectPtr<class UCameraComponent>	  FollowCamera;
 
 private:
-	bool isMyplayer = false;
+	bool isMyPlayer = false;
 };

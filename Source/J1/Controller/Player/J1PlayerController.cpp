@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Types/J1LogChannels.h"
 
 
 AJ1PlayerController::AJ1PlayerController()
@@ -70,7 +71,7 @@ void AJ1PlayerController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(IA_Jump, ETriggerEvent::Completed, this, &AJ1PlayerController::StopJumpingAct);
 		EnhancedInputComponent->BindAction(IA_Move, ETriggerEvent::Triggered, this, &AJ1PlayerController::MoveAct);
 		EnhancedInputComponent->BindAction(IA_Move, ETriggerEvent::Completed, this, &AJ1PlayerController::OnMoveCompleted);
-		//EnhancedInputComponent->BindAction(IA_Look, ETriggerEvent::Triggered, this, &AJ1PlayerController::LookAct);
+		EnhancedInputComponent->BindAction(IA_Look, ETriggerEvent::Triggered, this, &AJ1PlayerController::LookAct);
 		EnhancedInputComponent->BindAction(IA_LockOn, ETriggerEvent::Started, this, &AJ1PlayerController::ToggleLockOn);
 		EnhancedInputComponent->BindAction(IA_Attack, ETriggerEvent::Triggered, this, &AJ1PlayerController::AttackAct);
 		EnhancedInputComponent->BindAction(IA_Skill, ETriggerEvent::Triggered, this, &AJ1PlayerController::SkillAct);
@@ -99,7 +100,7 @@ void AJ1PlayerController::MoveAct(const FInputActionValue& Value)
 	if (AJ1Player* ControlledPlayer = Cast<AJ1Player>(GetCharacter()))
 	{
 		ControlledPlayer->Move(Value);
-		UE_LOG(LogTemp, Log, TEXT("%s"), *Value.ToString());
+		UE_LOG(PlayerLog, Log, TEXT("%s"), *Value.ToString());
 	}
 }
 void AJ1PlayerController::OnMoveCompleted(const FInputActionValue& Value)
@@ -107,7 +108,7 @@ void AJ1PlayerController::OnMoveCompleted(const FInputActionValue& Value)
 	if (AJ1Player* ControlledPlayer = Cast<AJ1Player>(GetCharacter()))
 	{
 		ControlledPlayer->Move(Value);
-		UE_LOG(LogTemp, Log, TEXT("%s"), *Value.ToString());
+		UE_LOG(PlayerLog, Log, TEXT("%s"), *Value.ToString());
 	}
 }
 

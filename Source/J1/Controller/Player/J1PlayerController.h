@@ -21,6 +21,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
+	virtual void OnPossess(APawn* InPawn) override;
 
 public:
 	// Lock On
@@ -72,7 +73,13 @@ protected:
 	TObjectPtr<class UInputAction> IA_UI;
 
 	// Widget
+	UPROPERTY()	class UJ1InventoryWidget* InventoryWidget;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UI)
+	TSubclassOf<UUserWidget> InventoryWidgetClass;
 
+public:
+	TArray<UUserWidget*> OpenedWidget;
 
 private:
 	FInputModeGameOnly GameInputMode;

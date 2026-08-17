@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Character/J1CreatureBase.h"
 #include "InputActionValue.h"
+#include "Manager/ActorComponent/J1InventoryManager.h"
 #include "J1Player.generated.h"
 
 UCLASS()
@@ -30,7 +31,7 @@ public:
 
 public:
 	void SetMyPlayer(bool _isMyPlayer) { isMyPlayer = _isMyPlayer; }
-
+	UJ1InventoryManager* GetInventory() { return MyInventory; }
 
 	/*
 	*   Member Variable
@@ -38,6 +39,9 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, Category = "Camera")	TObjectPtr<class USpringArmComponent> CameraBoom;
 	UPROPERTY(EditAnywhere, Category = "Camera")	TObjectPtr<class UCameraComponent>	  FollowCamera;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory", meta = (AllowPrivateAccess = "true")) 
+	TObjectPtr<class UJ1InventoryManager> MyInventory;
 
 private:
 	bool isMyPlayer = false;

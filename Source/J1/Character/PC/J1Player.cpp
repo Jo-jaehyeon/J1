@@ -45,6 +45,9 @@ AJ1Player::AJ1Player() : Super()
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -88.0f), FRotator(0.0f, -90.0f, 0.0f));
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	GetMesh()->SetCollisionProfileName(TEXT("NoCollision"));
+	
+	//Inventory
+	MyInventory = CreateDefaultSubobject<UJ1InventoryManager>(TEXT("MyInventory"));
 }
 
 AJ1Player::~AJ1Player()

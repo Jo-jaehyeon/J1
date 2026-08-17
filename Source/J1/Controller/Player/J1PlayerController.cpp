@@ -9,7 +9,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Types/J1LogChannels.h"
-
+#include "UI/Item/J1InventoryWidget.h"
 
 AJ1PlayerController::AJ1PlayerController()
 {
@@ -38,12 +38,15 @@ AJ1PlayerController::AJ1PlayerController()
 	static ConstructorHelpers::FObjectFinder<UInputAction> IA_SkillRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Action/IA_Skill.IA_Skill'"));
 	if (nullptr != IA_SkillRef.Object)
 		IA_Skill = IA_SkillRef.Object;
-	static ConstructorHelpers::FObjectFinder<UInputAction> IA_UIRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Action/IA_Inventory.IA_Inventory'"));
+	static ConstructorHelpers::FObjectFinder<UInputAction> IA_UIRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Action/IA_UI.IA_UI'"));
 	if (nullptr != IA_UIRef.Object)
 		IA_UI = IA_UIRef.Object;
 
 	//Widget
-
+	static ConstructorHelpers::FClassFinder<UJ1InventoryWidget> Inventory_UI(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/UI/Inventory/WBP_Inventory.WBP_Inventory_C'"));
+	{
+		InventoryWidgetClass = Inventory_UI.Class;
+	}
 }
 
 void AJ1PlayerController::BeginPlay()
@@ -79,6 +82,20 @@ void AJ1PlayerController::SetupInputComponent()
 	}
 }
 
+void AJ1PlayerController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	InventoryWidget = CreateWidget<UJ1InventoryWidget>(this, InventoryWidgetClass);
+	if (AJ1Player* ControlledPlayer = Cast<AJ1Player>(InPawn))
+	{
+		if (InventoryWidget)
+		{
+			InventoryWidget->InitInventory(ControlledPlayer->GetInventory());
+		}
+	}
+}
+
 void AJ1PlayerController::JumpAct()
 {
 	if (AJ1Player* ControlledPlayer = Cast<AJ1Player>(GetCharacter()))
@@ -100,7 +117,7 @@ void AJ1PlayerController::MoveAct(const FInputActionValue& Value)
 	if (AJ1Player* ControlledPlayer = Cast<AJ1Player>(GetCharacter()))
 	{
 		ControlledPlayer->Move(Value);
-		UE_LOG(PlayerLog, Log, TEXT("%s"), *Value.ToString());
+		UE_LOG(PlayerLog, Log, TEXT("Move : %s"), *Value.ToString());
 	}
 }
 void AJ1PlayerController::OnMoveCompleted(const FInputActionValue& Value)
@@ -108,7 +125,7 @@ void AJ1PlayerController::OnMoveCompleted(const FInputActionValue& Value)
 	if (AJ1Player* ControlledPlayer = Cast<AJ1Player>(GetCharacter()))
 	{
 		ControlledPlayer->Move(Value);
-		UE_LOG(PlayerLog, Log, TEXT("%s"), *Value.ToString());
+		UE_LOG(PlayerLog, Log, TEXT("Move :%s"), *Value.ToString());
 	}
 }
 
@@ -160,7 +177,32 @@ void AJ1PlayerController::SkillAct(const FInputActionValue& Value)
 }
 void AJ1PlayerController::ShowUI(const FInputActionValue& Value)
 {
+	UE_LOG(PlayerLog, Log, TEXT("UI : %s"), *Value.ToString());
+	SetShowMouseCursor(true);
 	if (AJ1Player* ControlledPlayer = Cast<AJ1Player>(GetCharacter()))
 	{
+		SetInputMode(UIInputMode);
+		SetShowMouseCursor(true);
+		int index = static_cast<int>(Value.Get<float>());
+
+		if (index == 1)
+		{
+			if (!OpenedWidget.IsEmpty())
+				OpenedWidget.Pop()->RemoveFromParent();
+			else
+			{
+				// 인벤토리 갱신 PKT
+				
+				InventoryWidget->AddToViewport();
+				OpenedWidget.AddUnique(InventoryWidget);
+			}
+			UE_LOG(PlayerLog, Log, TEXT("input Inventory"));
+		}
+
+		if (OpenedWidget.IsEmpty())
+		{
+			SetInputMode(GameInputMode);
+			SetShowMouseCursor(false);
+		}
 	}
 }

@@ -6,6 +6,7 @@
 #include "J1InventorySlotWidget.generated.h"
 
 class UJ1InventoryManager;
+class UJ1ItemDragWidget;
 class UImage;
 class UTextBlock;
 

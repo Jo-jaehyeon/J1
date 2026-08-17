@@ -10,7 +10,8 @@
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
 				"UMG",
-				"Engine"
+				"Engine",
+				"CoreUObject"
 			]
 		}
 	],
@@ -21,6 +22,6 @@
 			"TargetAllowList": [
 				"Editor"
 			]
-		}
+		} 
 	]
 }

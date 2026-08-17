@@ -9,6 +9,29 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryChanged);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSlotChanged, int32, SlotIndex);
 
+/**
+ * 인벤토리 슬롯 하나. 
+ * 스택 개수는 인스턴스가 아니라 슬롯
+ */
+USTRUCT(BlueprintType)
+struct FJ1InventorySlot
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	TObjectPtr<UJ1ItemInstance> ItemInstance = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	int32 StackCount = 0;
+
+	bool IsEmpty() const { return ItemInstance == nullptr || StackCount <= 0; }
+
+	void Reset()
+	{
+		ItemInstance = nullptr;
+		StackCount = 0;
+	}
+};
 
 UCLASS(ClassGroup = (Inventory), meta = (BlueprintSpawnableComponent))
 class J1_API UJ1InventoryManager : public UActorComponent
@@ -30,11 +53,11 @@ public:
 	int32 GetSlotCount() const { return Slots.Num(); }
 
 	UFUNCTION(BlueprintPure, Category = "Inventory")
-	FInventorySlot GetSlot(int32 Index) const;
+	FJ1InventorySlot GetSlot(int32 Index) const;
 
 	// 기존 스택에 먼저 병합을 시도하고, 남으면 빈 슬롯에 채움. 리턴값 = 못 넣고 남은 개수(0=전량 성공)
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	int32 AddItem(const FJ1ItemInstance& NewItem);
+	int32 AddItem(UJ1ItemInstance* NewItem, int32 Count = 1);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	bool RemoveItemAt(int32 SlotIndex, int32 Count = 1);
@@ -51,6 +74,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	bool UseItem(int32 SlotIndex);
 
+private:
+	// MaxStackCount는 아이템 인스턴스가 아니라 템플릿에 있는 값이라 매번 조회해야 한다.
+	static int32 GetMaxStackCount(const UJ1ItemInstance* Item);
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (ClampMin = "1"))
@@ -67,5 +93,5 @@ public:
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-	TArray<FInventorySlot> Slots;
+	TArray<FJ1InventorySlot> Slots;
 };

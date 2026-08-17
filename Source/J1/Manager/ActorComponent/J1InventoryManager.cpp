@@ -1,7 +1,8 @@
 ﻿// Copyright © 2026 Jerry. All rights reserved.
 
 #include "J1InventoryManager.h"
-#include "Item/J1ItemDefinition.h"
+#include "Item/J1ItemInstance.h"
+#include "Item/J1ItemTemplate.h"
 
 UJ1InventoryManager::UJ1InventoryManager()
 {
@@ -34,36 +35,35 @@ void UJ1InventoryManager::ResizeInventory(int32 NewColumns, int32 NewRows)
 	OnInventoryChanged.Broadcast();
 }
 
-FInventorySlot UJ1InventoryManager::GetSlot(int32 Index) const
+FJ1InventorySlot UJ1InventoryManager::GetSlot(int32 Index) const
 {
-	return Slots.IsValidIndex(Index) ? Slots[Index] : FInventorySlot();
+	return Slots.IsValidIndex(Index) ? Slots[Index] : FJ1InventorySlot();
 }
 
-int32 UJ1InventoryManager::AddItem(const FJ1ItemInstance& NewItem)
+int32 UJ1InventoryManager::AddItem(UJ1ItemInstance* NewItem, int32 Count)
 {
-	if (!NewItem.IsValid())
+	if (!NewItem || Count <= 0)
 	{
 		return 0;
 	}
 
-	int32 Remaining = NewItem.StackCount;
-	const UJ1ItemDefinition* Def = NewItem.ItemDefinition.LoadSynchronous();
-	const int32 MaxStack = (Def && Def->bStackable) ? Def->MaxStackSize : 1;
+	int32 Remaining = Count;
+	const int32 MaxStack = GetMaxStackCount(NewItem);
 
 	// 1) 기존 스택에 우선 병합
-	if (Def && Def->bStackable)
+	if (MaxStack > 1)
 	{
-		for (FInventorySlot& Slot : Slots)
+		for (FJ1InventorySlot& Slot : Slots)
 		{
 			if (Remaining <= 0) break;
 			if (Slot.IsEmpty()) continue;
-			if (!Slot.Item.CanStackWith(NewItem)) continue;
+			if (!Slot.ItemInstance->CanStackWith(NewItem)) continue;
 
-			const int32 Space = MaxStack - Slot.Item.StackCount;
+			const int32 Space = MaxStack - Slot.StackCount;
 			if (Space <= 0) continue;
 
 			const int32 ToMove = FMath::Min(Space, Remaining);
-			Slot.Item.StackCount += ToMove;
+			Slot.StackCount += ToMove;
 			Remaining -= ToMove;
 		}
 	}
@@ -73,11 +73,9 @@ int32 UJ1InventoryManager::AddItem(const FJ1ItemInstance& NewItem)
 	{
 		if (!Slots[i].IsEmpty()) continue;
 
-		FJ1ItemInstance Split = NewItem;
-		Split.InstanceGuid = FGuid::NewGuid();
-		Split.StackCount = FMath::Min(MaxStack, Remaining);
-		Slots[i].Item = Split;
-		Remaining -= Split.StackCount;
+		Slots[i].ItemInstance = NewItem;
+		Slots[i].StackCount = FMath::Min(MaxStack, Remaining);
+		Remaining -= Slots[i].StackCount;
 	}
 
 	OnInventoryChanged.Broadcast();
@@ -91,9 +89,9 @@ bool UJ1InventoryManager::RemoveItemAt(int32 SlotIndex, int32 Count)
 		return false;
 	}
 
-	FInventorySlot& Slot = Slots[SlotIndex];
-	Slot.Item.StackCount -= Count;
-	if (Slot.Item.StackCount <= 0)
+	FJ1InventorySlot& Slot = Slots[SlotIndex];
+	Slot.StackCount -= Count;
+	if (Slot.StackCount <= 0)
 	{
 		Slot.Reset();
 	}
@@ -109,24 +107,24 @@ bool UJ1InventoryManager::MoveItem(int32 FromIndex, int32 ToIndex)
 	if (!Slots.IsValidIndex(FromIndex) || !Slots.IsValidIndex(ToIndex)) return false;
 	if (Slots[FromIndex].IsEmpty()) return false;
 
-	FInventorySlot& From = Slots[FromIndex];
-	FInventorySlot& To = Slots[ToIndex];
+	FJ1InventorySlot& From = Slots[FromIndex];
+	FJ1InventorySlot& To = Slots[ToIndex];
 
 	if (To.IsEmpty())
 	{
-		To.Item = From.Item;
+		To.ItemInstance = From.ItemInstance;
+		To.StackCount = From.StackCount;
 		From.Reset();
 	}
-	else if (To.Item.CanStackWith(From.Item))
+	else if (To.ItemInstance->CanStackWith(From.ItemInstance))
 	{
-		const UJ1ItemDefinition* Def = To.Item.ItemDefinition.LoadSynchronous();
-		const int32 MaxStack = Def ? Def->MaxStackSize : 1;
-		const int32 Space = MaxStack - To.Item.StackCount;
-		const int32 ToMove = FMath::Min(Space, From.Item.StackCount);
+		const int32 MaxStack = GetMaxStackCount(To.ItemInstance);
+		const int32 Space = MaxStack - To.StackCount;
+		const int32 ToMove = FMath::Min(Space, From.StackCount);
 
-		To.Item.StackCount += ToMove;
-		From.Item.StackCount -= ToMove;
-		if (From.Item.StackCount <= 0)
+		To.StackCount += ToMove;
+		From.StackCount -= ToMove;
+		if (From.StackCount <= 0)
 		{
 			From.Reset();
 		}
@@ -134,12 +132,13 @@ bool UJ1InventoryManager::MoveItem(int32 FromIndex, int32 ToIndex)
 	else
 	{
 		// 다른 아이템, 혹은 스택 불가(장비) -> 위치 스왑
-		Swap(From.Item, To.Item);
+		Swap(From.ItemInstance, To.ItemInstance);
+		Swap(From.StackCount, To.StackCount);
 	}
 
 	OnSlotChanged.Broadcast(FromIndex);
 	OnSlotChanged.Broadcast(ToIndex);
-	OnInventoryChanged.Broadcast();
+
 	return true;
 }
 
@@ -151,11 +150,11 @@ bool UJ1InventoryManager::DropItem(int32 SlotIndex, int32 DropCount)
 	}
 
 	const int32 CountToDrop = (DropCount < 0)
-		? Slots[SlotIndex].Item.StackCount
-		: FMath::Min(DropCount, Slots[SlotIndex].Item.StackCount);
+		? Slots[SlotIndex].StackCount
+		: FMath::Min(DropCount, Slots[SlotIndex].StackCount);
 
 	// TODO: 여기서 실제 월드 픽업 액터를 스폰.
-	// 예) GetWorld()->SpawnActor<AItemPickup>(...)->InitFromItemInstance(Slots[SlotIndex].Item, CountToDrop);
+	// 예) GetWorld()->SpawnActor<AJ1ItemPickup>(...)->InitFromItemInstance(Slots[SlotIndex].ItemInstance, CountToDrop);
 
 	return RemoveItemAt(SlotIndex, CountToDrop);
 }
@@ -167,19 +166,23 @@ bool UJ1InventoryManager::UseItem(int32 SlotIndex)
 		return false;
 	}
 
-	const UJ1ItemDefinition* Def = Slots[SlotIndex].Item.ItemDefinition.LoadSynchronous();
-	if (!Def)
+	const UJ1ItemInstance* Item = Slots[SlotIndex].ItemInstance;
+	const UJ1ItemTemplate* ItemTemplate = Item->GetItemTemplate();
+	if (!ItemTemplate)
 	{
 		return false;
 	}
 
-	// TODO: 실제 사용 효과 발동.
-	// Def에 UItemUseEffect 같은 자산을 참조시키거나, BlueprintImplementableEvent로
-	// 디자이너가 C++ 안 건드리고 효과를 만들 수 있게 하는 걸 추천.
+	// TODO: 실제 사용 효과 발동 (Utility Fragment 등을 찾아서 처리).
 
-	if (Def->ItemType == EItemType::Consumable)
-	{
-		RemoveItemAt(SlotIndex, 1);
-	}
+
 	return true;
+}
+
+int32 UJ1InventoryManager::GetMaxStackCount(const UJ1ItemInstance* Item)
+{
+	if (!Item) return 1;
+
+	const UJ1ItemTemplate* ItemTemplate = Item->GetItemTemplate();
+	return (ItemTemplate && ItemTemplate->MaxStackCount > 0) ? ItemTemplate->MaxStackCount : 1;
 }

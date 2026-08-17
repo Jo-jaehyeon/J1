@@ -7,7 +7,7 @@
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
-#include "Item/J1ItemDefinition.h"
+#include "Item/J1ItemTemplate.h"
 
 void UJ1InventorySlotWidget::InitSlot(UJ1InventoryManager* InInventory, int32 InSlotIndex)
 {
@@ -20,19 +20,21 @@ void UJ1InventorySlotWidget::RefreshVisuals()
 {
 	if (!Inventory.IsValid()) return;
 
-	const FInventorySlot IS = Inventory->GetSlot(SlotIndex);
+	const FJ1InventorySlot IS = Inventory->GetSlot(SlotIndex);
 	const bool bHasItem = !IS.IsEmpty();
 
 	if (Img_Icon)
 	{
 		Img_Icon->SetVisibility(bHasItem ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+
 		if (bHasItem)
 		{
-			if (const UJ1ItemDefinition* Def = IS.Item.ItemDefinition.LoadSynchronous())
+			// IconTexture가 하드 레퍼런스(TObjectPtr)라 별도 로드 없이 바로 사용 가능.
+			if (const UJ1ItemTemplate* ItemTemplate = IS.ItemInstance->GetItemTemplate())
 			{
-				if (UTexture2D* Texture = Def->Icon.LoadSynchronous())
+				if (ItemTemplate->IconTexture)
 				{
-					Img_Icon->SetBrushFromTexture(Texture);
+					Img_Icon->SetBrushFromTexture(ItemTemplate->IconTexture);
 				}
 			}
 		}
@@ -40,9 +42,9 @@ void UJ1InventorySlotWidget::RefreshVisuals()
 
 	if (Txt_StackCount)
 	{
-		const bool bShowCount = bHasItem && IS.Item.StackCount > 1;
+		const bool bShowCount = bHasItem && IS.StackCount > 1;
 		Txt_StackCount->SetVisibility(bShowCount ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
-		Txt_StackCount->SetText(FText::AsNumber(IS.Item.StackCount));
+		Txt_StackCount->SetText(FText::AsNumber(IS.StackCount));
 	}
 }
 

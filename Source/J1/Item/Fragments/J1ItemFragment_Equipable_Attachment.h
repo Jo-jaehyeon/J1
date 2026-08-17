@@ -42,19 +42,4 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UAnimMontage> EquipMontage;
-
-	UPROPERTY(EditDefaultsOnly)
-	TSoftObjectPtr<UAnimMontage> FrontHitMontage;
-
-	UPROPERTY(EditDefaultsOnly)
-	TSoftObjectPtr<UAnimMontage> BackHitMontage;
-
-	UPROPERTY(EditDefaultsOnly)
-	TSoftObjectPtr<UAnimMontage> LeftHitMontage;
-
-	UPROPERTY(EditDefaultsOnly)
-	TSoftObjectPtr<UAnimMontage> RightHitMontage;
-
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<UAnimInstance> AnimInstanceClass;
 };

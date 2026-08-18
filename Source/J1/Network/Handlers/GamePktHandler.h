@@ -1,5 +1,6 @@
 #pragma once
 #include "Packet.h"
+#include "BasicPktHandler.h"
 #include "BattlePktHandler.h"
 #include "LobbyPktHandler.h"
 
@@ -20,6 +21,15 @@ public:
 		for (int32 i = 0; i < UINT16_MAX; i++)
 			GGamePacketHandler[i] = Handle_Game_INVALID;
 
+		GGamePacketHandler[Game::PacketType::PKT_RES_SPAWN] = [](SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset) {
+			return DispatchPacket<Game::RES_SPAWN>(Handle_RES_SPAWN, session, buffer, offset);
+			};
+		GGamePacketHandler[Game::PacketType::PKT_RES_DESPAWN] = [](SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset) {
+			return DispatchPacket<Game::RES_DESPAWN>(Handle_RES_DESPAWN, session, buffer, offset);
+			};
+		GGamePacketHandler[Game::PacketType::PKT_RES_MOVE] = [](SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset) {
+			return DispatchPacket<Game::RES_MOVE>(Handle_RES_MOVE, session, buffer, offset);
+			};
 		GGamePacketHandler[Game::PacketType::PKT_RES_ATTACK] = [](SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset) {
 			return DispatchPacket<Game::RES_ATTACK>(Handle_RES_ATTACK, session, buffer, offset);
 			};

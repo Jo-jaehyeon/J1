@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 
 using UnrealBuildTool;
 
@@ -12,7 +12,8 @@ public class J1 : ModuleRules
             "Core", "CoreUObject", "Engine", 
             "InputCore", "EnhancedInput", 
             "UMG", "SlateCore", 
-            "Sockets", "Networking" });
+            "Sockets", "Networking",
+            "GameplayAbilities", "GameplayTags", "GameplayTasks"});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "ThirdParty" });
 

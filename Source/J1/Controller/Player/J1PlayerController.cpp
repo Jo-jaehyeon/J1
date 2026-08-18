@@ -9,7 +9,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Types/J1LogChannels.h"
-#include "UI/Item/J1InventoryWidget.h"
+#include "UI/Item/Inventory/J1InventoryWidget.h"
 
 AJ1PlayerController::AJ1PlayerController()
 {

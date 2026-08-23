@@ -73,10 +73,10 @@ protected:
 	TObjectPtr<class UInputAction> IA_UI;
 
 	// Widget
-	UPROPERTY()	class UJ1InventoryWidget* InventoryWidget;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UI)
-	TSubclassOf<UUserWidget> InventoryWidgetClass;
+	UPROPERTY()	class UJ1InventoryWidget*	InventoryWidget;
+	UPROPERTY()	class UJ1AuctionWidget*		AuctionWidget;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UI)	TSubclassOf<UUserWidget> InventoryWidgetClass;	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UI)	TSubclassOf<UUserWidget> AuctionWidgetClass;
 
 public:
 	TArray<UUserWidget*> OpenedWidget;

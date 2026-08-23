@@ -10,6 +10,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Types/J1LogChannels.h"
 #include "UI/Item/Inventory/J1InventoryWidget.h"
+#include "UI/Item/Auction/J1AuctionWidget.h"
 
 AJ1PlayerController::AJ1PlayerController()
 {
@@ -46,6 +47,10 @@ AJ1PlayerController::AJ1PlayerController()
 	static ConstructorHelpers::FClassFinder<UJ1InventoryWidget> Inventory_UI(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/UI/Inventory/WBP_Inventory.WBP_Inventory_C'"));
 	{
 		InventoryWidgetClass = Inventory_UI.Class;
+	}
+	static ConstructorHelpers::FClassFinder<UJ1AuctionWidget> Auction_UI(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/UI/Auction/WBP_Auction.WBP_Auction_C'"));
+	{
+		AuctionWidgetClass = Auction_UI.Class;
 	}
 }
 
@@ -87,12 +92,10 @@ void AJ1PlayerController::OnPossess(APawn* InPawn)
 	Super::OnPossess(InPawn);
 
 	InventoryWidget = CreateWidget<UJ1InventoryWidget>(this, InventoryWidgetClass);
+	AuctionWidget = CreateWidget<UJ1AuctionWidget>(this, AuctionWidgetClass);
 	if (AJ1Player* ControlledPlayer = Cast<AJ1Player>(InPawn))
 	{
-		if (InventoryWidget)
-		{
-			InventoryWidget->InitInventory(ControlledPlayer->GetInventory());
-		}
+		if (InventoryWidget)	InventoryWidget->InitInventory(ControlledPlayer->GetInventory());		
 	}
 }
 
@@ -196,7 +199,17 @@ void AJ1PlayerController::ShowUI(const FInputActionValue& Value)
 				InventoryWidget->AddToViewport();
 				OpenedWidget.AddUnique(InventoryWidget);
 			}
-			UE_LOG(PlayerLog, Log, TEXT("input Inventory"));
+		}
+		else if (index == 2)
+		{
+			if (!OpenedWidget.IsEmpty())
+				OpenedWidget.Pop()->RemoveFromParent();
+			else
+			{
+				// 옥션 갱신 PKT
+				AuctionWidget->AddToViewport();
+				OpenedWidget.AddUnique(AuctionWidget);
+			}
 		}
 
 		if (OpenedWidget.IsEmpty())

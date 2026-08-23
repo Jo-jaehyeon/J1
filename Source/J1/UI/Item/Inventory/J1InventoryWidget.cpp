@@ -87,3 +87,8 @@ void UJ1InventoryWidget::HandleSlotChanged(int32 SlotIndex)
 		SlotWidgets[SlotIndex]->RefreshVisuals();
 	}
 }
+
+void UJ1InventoryWidget::HandleSlotClicked(UJ1InventoryManager* InInventory, int32 SlotIndex)
+{
+	OnItemSelected.Broadcast(InInventory, SlotIndex);
+}

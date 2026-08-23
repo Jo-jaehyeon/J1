@@ -61,6 +61,11 @@ FReply UJ1InventorySlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeomet
 
 	if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
 	{
+		if (Inventory.IsValid())
+		{
+			OnSlotClicked.Broadcast(Inventory.Get(), SlotIndex);
+		}
+
 		return UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton).NativeReply;
 	}
 
@@ -69,15 +74,13 @@ FReply UJ1InventorySlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeomet
 
 void UJ1InventorySlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
 {
-	if (!Inventory.IsValid() || Inventory->GetSlot(SlotIndex).IsEmpty())
-	{
-		return;
-	}
+	const FJ1InventorySlot IS = Inventory->GetSlot(SlotIndex);
+	if (IS.IsEmpty())			return;
+	if (!Inventory.IsValid())	return;
 
 	UJ1DragDrop* Op = NewObject<UJ1DragDrop>(this);
 	Op->SourceSlotIndex = SlotIndex;
 	Op->SourceInventory = Inventory.Get();
-	Op->DefaultDragVisual = this; // 필요하면 아이콘만 보여주는 전용 드래그 비주얼 위젯으로 교체
 	Op->Pivot = EDragPivot::MouseDown;
 
 	// 주의: this(그리드에 배치된 실제 슬롯 위젯)를 DefaultDragVisual로 재사용하면
@@ -97,14 +100,11 @@ void UJ1InventorySlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, c
 		Op->DefaultDragVisual = Visual;
 	}
 
-
 	OutOperation = Op;
 }
 
 bool UJ1InventorySlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
-	UE_LOG(LogTemp, Warning, TEXT("NativeOnDrop called on SlotIndex=%d"), SlotIndex);
-
 	UJ1DragDrop* Op = Cast<UJ1DragDrop>(InOperation);
 	if (!Op || !Op->SourceInventory.IsValid() || !Inventory.IsValid())
 	{
@@ -128,8 +128,6 @@ bool UJ1InventorySlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDr
 
 void UJ1InventorySlotWidget::NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
-	UE_LOG(LogTemp, Warning, TEXT("NativeOnDragCancelled called, source SlotIndex=%d"), SlotIndex);
-
 	// 이 함수는 드롭 대상이 NativeOnDrop을 처리하지 못했을 때(=인벤토리 슬롯 바깥에서 놓았을 때)
 	// 드래그를 시작한 위젯 쪽에서 호출됨 -> 여기서 "버리기"로 처리
 	UJ1DragDrop* Op = Cast<UJ1DragDrop>(InOperation);

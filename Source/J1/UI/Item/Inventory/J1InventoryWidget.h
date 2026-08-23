@@ -9,6 +9,8 @@ class UJ1InventoryManager;
 class UJ1InventorySlotWidget;
 class UUniformGridPanel;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FJ1OnItemSelected, UJ1InventoryManager*, Inventory, int32, SlotIndex);
+
 //  인벤토리 전체를 보여주는 위젯.
 UCLASS()
 class J1_API UJ1InventoryWidget : public UUserWidget
@@ -28,9 +30,13 @@ protected:
 
 	UFUNCTION()	void HandleInventoryChanged();
 	UFUNCTION()	void HandleSlotChanged(int32 SlotIndex);
-
+	UFUNCTION() void HandleSlotClicked(UJ1InventoryManager* InInventory, int32 SlotIndex);
 
 public:
+	// 아이템 등록 UI 등, "인벤토리에서 아이템을 하나 골라야 하는" 외부 UI가 구독하는 진입점.
+	UPROPERTY(BlueprintAssignable, Category = "Inventory")
+	FJ1OnItemSelected OnItemSelected;
+
 	// 슬롯 위젯 클래스는 보통 BP_InventorySlotWidget(UInventorySlotWidget 상속) 지정
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory")
 	TSubclassOf<UJ1InventorySlotWidget> SlotWidgetClass;

@@ -40,6 +40,20 @@ protected:
 	void SkillAct(const FInputActionValue& Value);
 	void ShowUI(const FInputActionValue& Value);
 
+private:
+	//----------------------
+	//		경매장 관련
+	//----------------------
+	UFUNCTION() void OpenInventoryForAuction();
+	UFUNCTION() void ReceiptAuctionProceeds(FAuctionEntry Entry);
+	UFUNCTION() void ConfirmAuctionPurchase(FAuctionEntry Entry, int32 Quantity);
+	UFUNCTION() void SubmitAuctionRegister(UJ1InventoryManager* SourceInventory, int32 SourceSlotIndex, int64 PricePerUnit, int32 Quantity, int32 DurationHours);
+
+	void HandleAuctionListResponse(const TArray<FAuctionEntry>& Entries);
+	void HandleMyAuctionListResponse(const TArray<FAuctionEntry>& Entries);
+	void HandleRegisterResponse(bool bSuccess);
+	void HandleLowestPriceResponse(int64 LowestPrice);
+
 	/*
 	*  Member Variable
 	*/

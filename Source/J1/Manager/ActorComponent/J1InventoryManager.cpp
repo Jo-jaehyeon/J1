@@ -179,6 +179,22 @@ bool UJ1InventoryManager::UseItem(int32 SlotIndex)
 	return true;
 }
 
+void UJ1InventoryManager::SetGold(int64 NewGold)
+{
+	Gold = FMath::Max<int64>(0, NewGold);
+	OnGoldChanged.Broadcast(Gold);
+}
+
+bool UJ1InventoryManager::AddGold(int64 Delta)
+{
+	if (Delta == 0)				return true;
+	if (Gold + Delta < 0)		return false;
+
+	Gold += Delta;
+	OnGoldChanged.Broadcast(Gold);
+	return true;
+}
+
 int32 UJ1InventoryManager::GetMaxStackCount(const UJ1ItemInstance* Item)
 {
 	if (!Item) return 1;

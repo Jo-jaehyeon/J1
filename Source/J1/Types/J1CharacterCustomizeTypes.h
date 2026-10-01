@@ -121,6 +121,7 @@ struct FLobbySlotInfo
     UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  ECharacterClass ClassType = ECharacterClass::Warrior;
     UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  FString CharacterName;
     UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  int64 Level = 1;
+    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  int64 Gold = 0;
 
     // DT_SkinMaterial의 Material index
     UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Lobby")  int64 UpperBodySkinRowID;

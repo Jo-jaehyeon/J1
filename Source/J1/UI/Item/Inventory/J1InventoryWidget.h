@@ -8,6 +8,7 @@
 class UJ1InventoryManager;
 class UJ1InventorySlotWidget;
 class UUniformGridPanel;
+class UTextBlock;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FJ1OnItemSelected, UJ1InventoryManager*, Inventory, int32, SlotIndex);
 
@@ -31,6 +32,7 @@ protected:
 	UFUNCTION()	void HandleInventoryChanged();
 	UFUNCTION()	void HandleSlotChanged(int32 SlotIndex);
 	UFUNCTION() void HandleSlotClicked(UJ1InventoryManager* InInventory, int32 SlotIndex);
+	UFUNCTION() void HandleGoldChanged(int64 NewGold);
 
 public:
 	// 아이템 등록 UI 등, "인벤토리에서 아이템을 하나 골라야 하는" 외부 UI가 구독하는 진입점.
@@ -45,6 +47,10 @@ protected:
 	// 위젯 블루프린트에서 이름을 "GridPanel"로 맞춰서 UniformGridPanel 배치
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional))
 	UUniformGridPanel* UGP_ItemSlots;
+
+	// 보유 골드 표시. 위젯 블루프린트에서 TextBlock 이름을 "Txt_Gold"로 맞춰서 배치
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional))
+	UTextBlock* Txt_Gold;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Inventory")
 	TWeakObjectPtr<UJ1InventoryManager> Inventory;

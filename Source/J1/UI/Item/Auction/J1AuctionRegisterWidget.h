@@ -12,7 +12,7 @@ class UEditableTextBox;
 class UButton;
 class UCheckBox;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FOnRegisterSubmitted, UJ1InventoryManager*, SourceInventory, int32, SourceSlotIndex, int64, PricePerUnit, int32, Quantity, int32, DurationHours);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FOnRegisterSubmitted, UJ1InventoryManager*, SourceInventory, int32, SourceSlotIndex, int64, PricePerUnit, int32, Quantity, FString, DurationHours);
 
 /**
  * 물품 등록 UI. 열려있는 동안 인벤토리 UI의 OnItemSelected를 구독해서
@@ -42,9 +42,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Auction")	void OnLowestPriceReceived(int64 LowestPrice);
 
 protected:
-	UFUNCTION(BlueprintImplementableEvent, Category = "Auction")
-	void OnDurationChanged(int32 DurationHours);
-
 	// 제출 중/실패 시 시각 표현(버튼 텍스트, 로딩 스피너, 에러 메시지 등)
 	UFUNCTION(BlueprintImplementableEvent, Category = "Auction")
 	void OnSubmittingStateChanged(bool bIsSubmitting);
@@ -90,7 +87,7 @@ private:
 	
 	int32	SelectedSlotIndex = INDEX_NONE;
 	int32	SelectedItemMaxQuantity = 1;
-	int32	SelectedDurationHours = 24;
+	FString	SelectedDurationHours = "24";
 	bool	bSelectedItemIsEquipment = false;
 	bool	bIsRegist = false;
 };

@@ -8,6 +8,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryChanged);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSlotChanged, int32, SlotIndex);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGoldChanged, int64, NewGold);
 
 /**
  * 인벤토리 슬롯 하나. 
@@ -74,6 +75,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	bool UseItem(int32 SlotIndex);
 
+	// ─────────── 골드 ───────────
+	// 서버(DB)에서 받은 값으로 그대로 덮어쓴다. (게임 입장 시 초기화 등)
+	UFUNCTION(BlueprintCallable, Category = "Inventory|Gold")
+	void SetGold(int64 NewGold);
+
+	// 서버가 성공 응답을 준 증감분만 반영한다 (확정 갱신). 결과가 음수가 되면 거부하고 false.
+	UFUNCTION(BlueprintCallable, Category = "Inventory|Gold")
+	bool AddGold(int64 Delta);
+
+	UFUNCTION(BlueprintPure, Category = "Inventory|Gold")
+	int64 GetGold() const { return Gold; }
+
 private:
 	// MaxStackCount는 아이템 인스턴스가 아니라 템플릿에 있는 값이라 매번 조회해야 한다.
 	static int32 GetMaxStackCount(const UJ1ItemInstance* Item);
@@ -91,7 +104,13 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Inventory")
 	FOnSlotChanged OnSlotChanged;
 
+	UPROPERTY(BlueprintAssignable, Category = "Inventory|Gold")
+	FOnGoldChanged OnGoldChanged;
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
 	TArray<FJ1InventorySlot> Slots;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory|Gold")
+	int64 Gold = 0;
 };

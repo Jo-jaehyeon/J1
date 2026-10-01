@@ -6,6 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Item/J1ItemInstance.h"
 
 AJ1Player::AJ1Player() : Super()
 {
@@ -57,6 +58,11 @@ AJ1Player::~AJ1Player()
 void AJ1Player::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// temp : remove
+	UJ1ItemInstance* temp = NewObject<UJ1ItemInstance>();
+	temp->Init(1, EItemRarity::Common);
+	MyInventory->AddItem(temp, 10);
 }
 
 void AJ1Player::Tick(float DeltaTime)

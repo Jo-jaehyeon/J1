@@ -1,5 +1,6 @@
 #pragma once
 #include "Packet.h"
+#include "AuctionPktHandler.h"
 #include "BasicPktHandler.h"
 #include "BattlePktHandler.h"
 #include "LobbyPktHandler.h"
@@ -21,6 +22,21 @@ public:
 		for (int32 i = 0; i < UINT16_MAX; i++)
 			GGamePacketHandler[i] = Handle_Game_INVALID;
 
+		GGamePacketHandler[Game::PacketType::PKT_RES_AUCTION_LIST] = [](SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset) {
+			return DispatchPacket<Game::RES_AUCTION_LIST>(Handle_RES_AUCTION_LIST, session, buffer, offset);
+			};
+		GGamePacketHandler[Game::PacketType::PKT_RES_RECEIPT_LIST] = [](SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset) {
+			return DispatchPacket<Game::RES_RECEIPT_LIST>(Handle_RES_RECEIPT_LIST, session, buffer, offset);
+			};
+		GGamePacketHandler[Game::PacketType::PKT_RES_REGIST_ITEM] = [](SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset) {
+			return DispatchPacket<Game::RES_REGIST_ITEM>(Handle_RES_REGIST_ITEM, session, buffer, offset);
+			};
+		GGamePacketHandler[Game::PacketType::PKT_RES_PURCHASE_ITEM] = [](SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset) {
+			return DispatchPacket<Game::RES_PURCHASE_ITEM>(Handle_RES_PURCHASE_ITEM, session, buffer, offset);
+			};
+		GGamePacketHandler[Game::PacketType::PKT_RES_RECEIPT_ITEM] = [](SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset) {
+			return DispatchPacket<Game::RES_RECEIPT_ITEM>(Handle_RES_RECEIPT_ITEM, session, buffer, offset);
+			};
 		GGamePacketHandler[Game::PacketType::PKT_RES_SPAWN] = [](SessionPtr& session, boost::asio::mutable_buffer& buffer, int32& offset) {
 			return DispatchPacket<Game::RES_SPAWN>(Handle_RES_SPAWN, session, buffer, offset);
 			};

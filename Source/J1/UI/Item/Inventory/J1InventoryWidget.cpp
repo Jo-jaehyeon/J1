@@ -5,6 +5,7 @@
 #include "Manager/ActorComponent/J1InventoryManager.h"
 #include "Components/UniformGridPanel.h"
 #include "Components/UniformGridSlot.h"
+#include "Components/TextBlock.h"
 
 void UJ1InventoryWidget::InitInventory(UJ1InventoryManager* InInventory)
 {
@@ -12,6 +13,7 @@ void UJ1InventoryWidget::InitInventory(UJ1InventoryManager* InInventory)
 	{
 		Inventory->OnInventoryChanged.RemoveDynamic(this, &UJ1InventoryWidget::HandleInventoryChanged);
 		Inventory->OnSlotChanged.RemoveDynamic(this, &UJ1InventoryWidget::HandleSlotChanged);
+		Inventory->OnGoldChanged.RemoveDynamic(this, &UJ1InventoryWidget::HandleGoldChanged);
 	}
 
 	Inventory = InInventory;
@@ -20,9 +22,11 @@ void UJ1InventoryWidget::InitInventory(UJ1InventoryManager* InInventory)
 	{
 		Inventory->OnInventoryChanged.AddDynamic(this, &UJ1InventoryWidget::HandleInventoryChanged);
 		Inventory->OnSlotChanged.AddDynamic(this, &UJ1InventoryWidget::HandleSlotChanged);
+		Inventory->OnGoldChanged.AddDynamic(this, &UJ1InventoryWidget::HandleGoldChanged);
 	}
 
 	RebuildGrid();
+	HandleGoldChanged(Inventory.IsValid() ? Inventory->GetGold() : 0);
 }
 
 void UJ1InventoryWidget::RebuildGrid()
@@ -44,6 +48,7 @@ void UJ1InventoryWidget::RebuildGrid()
 		if (!SlotWidget) continue;
 
 		SlotWidget->InitSlot(Inventory.Get(), Index);
+		SlotWidget->OnSlotClicked.AddDynamic(this, &UJ1InventoryWidget::HandleSlotClicked);
 
 		const int32 Row = Index / Columns;
 		const int32 Col = Index % Columns;
@@ -86,6 +91,12 @@ void UJ1InventoryWidget::HandleSlotChanged(int32 SlotIndex)
 	{
 		SlotWidgets[SlotIndex]->RefreshVisuals();
 	}
+}
+
+void UJ1InventoryWidget::HandleGoldChanged(int64 NewGold)
+{
+	// FText::AsNumber는 천 단위 구분 기호(1,234,567)를 자동으로 붙여준다.
+	if (Txt_Gold)	Txt_Gold->SetText(FText::Format(NSLOCTEXT("Inventory", "Gold", "보유 골드 : {0}"), FText::AsNumber(NewGold)));	
 }
 
 void UJ1InventoryWidget::HandleSlotClicked(UJ1InventoryManager* InInventory, int32 SlotIndex)

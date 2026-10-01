@@ -9,7 +9,7 @@
 #include "Manager/ActorComponent/J1InventoryManager.h"
 #include "Item/J1ItemInstance.h"
 #include "Item/J1ItemTemplate.h"
-#include "Item/Fragments/J1ItemFragment_Equipable.h"
+#include "Item/Fragments/J1ItemFragment_Equipable_Utility.h"
 #include "UI/Item/Inventory/J1InventoryWidget.h"
 
 void UJ1AuctionRegisterWidget::NativeOnInitialized()
@@ -26,8 +26,7 @@ void UJ1AuctionRegisterWidget::NativeOnInitialized()
 	if (Input_Quantity) Input_Quantity->OnTextChanged.AddDynamic(this, &UJ1AuctionRegisterWidget::HandleQuantityChanged);
 	if (Input_Price)	Input_Price->OnTextChanged.AddDynamic(this, &UJ1AuctionRegisterWidget::HandlePriceChanged);
 
-	SelectedDurationHours = 24;
-	OnDurationChanged(SelectedDurationHours);
+	SelectedDurationHours = "24";
 }
 
 void UJ1AuctionRegisterWidget::NativeDestruct()
@@ -59,6 +58,22 @@ void UJ1AuctionRegisterWidget::UnbindFromInventory()
 void UJ1AuctionRegisterWidget::ClosePanel()
 {
 	SetVisibility(ESlateVisibility::Collapsed);
+
+	if (Img_Icon)			Img_Icon->SetBrushFromTexture(nullptr);
+	if (Txt_Name)			Txt_Name->SetText(FText::FromString(TEXT("")));
+	if (Txt_LowestPrice)	Txt_LowestPrice->SetText(FText::FromString(TEXT("조회 중...")));
+	if (Input_Quantity)		Input_Quantity->SetText(FText::FromString(TEXT("")));
+	if (Input_Price)		Input_Price->SetText(FText::FromString(TEXT("")));
+	if (Txt_TotalPrice)		Txt_TotalPrice->SetText(FText::AsNumber(0));
+
+	// 다음에 열었을 때 이전 선택이 남아서 화면과 다른 아이템이 등록되지 않도록 초기화
+	SelectedInventory = nullptr;
+	SelectedSlotIndex = INDEX_NONE;
+	SelectedItemMaxQuantity = 1;
+
+	// 등록 성공 후 닫힌 경우 버튼이 비활성 상태로 남아있으므로 다시 켜준다.
+	if (Btn_Register)		Btn_Register->SetIsEnabled(true);
+	if (Btn_Cancel)			Btn_Cancel->SetIsEnabled(true);
 }
 
 void UJ1AuctionRegisterWidget::HandleRegisterResult(bool bSuccess)
@@ -76,13 +91,11 @@ void UJ1AuctionRegisterWidget::HandleRegisterResult(bool bSuccess)
 		{
 			const int32 Quantity = bSelectedItemIsEquipment
 				? 1	: (Input_Quantity ? FMath::Clamp(FCString::Atoi(*Input_Quantity->GetText().ToString()), 1, SelectedItemMaxQuantity) : 1);
-			SelectedInventory->RemoveItemAt(SelectedSlotIndex, 1);
+			SelectedInventory->RemoveItemAt(SelectedSlotIndex, Quantity);
 		}
 
-		SelectedInventory = nullptr;
-		SelectedSlotIndex = INDEX_NONE;
-
-		RemoveFromParent();
+		// 경매장 메인 위젯의 자식이므로 RemoveFromParent가 아니라 Collapsed로 숨긴다.
+		ClosePanel();
 	}
 	else
 	{
@@ -103,9 +116,11 @@ void UJ1AuctionRegisterWidget::OnLowestPriceReceived(int64 LowestPrice)
 
 void UJ1AuctionRegisterWidget::HandleItemSelected(UJ1InventoryManager* InInventory, int32 SlotIndex)
 {
+	// 등록 패널이 닫혀있거나 제출 중일 땐 인벤토리 클릭을 무시
+	if (!InInventory || bIsRegist || !IsVisible())	return;
+
 	const FJ1InventorySlot IS = InInventory->GetSlot(SlotIndex);
 	if (IS.IsEmpty())	return;
-	if (!InInventory)	return;
 
 	const UJ1ItemTemplate* ItemTemplate = IS.ItemInstance->GetItemTemplate();
 	if (!ItemTemplate)	return;
@@ -115,7 +130,7 @@ void UJ1AuctionRegisterWidget::HandleItemSelected(UJ1InventoryManager* InInvento
 	SelectedItemMaxQuantity = IS.StackCount;
 
 	// 장비인지 소비 아이템인지 판정 (UseItem()과 동일한 기준: Equipable Fragment 존재 여부)
-	bSelectedItemIsEquipment = (ItemTemplate->FindFragmentByClass<UJ1ItemFragment_Equipable>() != nullptr);
+	bSelectedItemIsEquipment = (ItemTemplate->FindFragmentByClass<UJ1ItemFragment_Equipable_Utility>() == nullptr);
 
 	if (Img_Icon && ItemTemplate->IconTexture)
 	{
@@ -183,11 +198,8 @@ void UJ1AuctionRegisterWidget::HandleRegisterClicked()
 	bIsRegist = true;
 	if (Btn_Register)	Btn_Register->SetIsEnabled(false);
 	if (Btn_Cancel)		Btn_Cancel->SetIsEnabled(false);
+	
 	OnSubmittingStateChanged(true);
-
-	// TODO: 실제 서버 등록 요청은 이 델리게이트를 구독하는 쪽에서.
-	// 서버 응답이 오면 반드시 HandleRegisterResult(bool)를 호출해서 이어줘야 한다.
-	// 여기서는 아직 인벤토리를 건드리지 않는다 - 확정(성공 응답) 후에만 실제로 뺀다.
 	OnRegisterSubmitted.Broadcast(SelectedInventory.Get(), SelectedSlotIndex, PricePerUnit, Quantity, SelectedDurationHours);
 }
 
@@ -201,8 +213,7 @@ void UJ1AuctionRegisterWidget::HandleCancelClicked()
 
 void UJ1AuctionRegisterWidget::HandleDurationToggleChanged(bool bIsChecked)
 {
-	SelectedDurationHours = bIsChecked ? 48 : 24;
-	OnDurationChanged(SelectedDurationHours);
+	SelectedDurationHours = bIsChecked ? "48" : "24";
 }
 
 void UJ1AuctionRegisterWidget::HandleQuantityChanged(const FText& NewText)
@@ -244,5 +255,5 @@ void UJ1AuctionRegisterWidget::UpdateTotalPrice()
 	const int64 PricePerUnit = Input_Price ? FCString::Atoi64(*Input_Price->GetText().ToString()) : 0;
 
 	const int64 Total = static_cast<int64>(FMath::Max(0, Quantity)) * FMath::Max<int64>(0, PricePerUnit);
-	Input_Quantity->SetText(FText::AsNumber(Total));
+	Txt_TotalPrice->SetText(FText::AsNumber(Total));
 }

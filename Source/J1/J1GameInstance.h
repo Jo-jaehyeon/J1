@@ -6,6 +6,7 @@
 #include "Engine/GameInstance.h"
 #include "J1.h"
 #include "Types/J1EnumTypes.h"
+#include "Types/J1AuctionDefine.h"
 #include "Types/J1CharacterCustomizeTypes.h"
 #include "J1GameInstance.generated.h"
 
@@ -15,6 +16,11 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnNotice, FString);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnCheckNickName, bool);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnLobbyListChange, bool, FLobbySlotInfo&);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnLobbyListSet, const TArray<FLobbySlotInfo>&);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnAuctionListSet, bool, const TArray<FAuctionEntry>&);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnResponseRegister, bool);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnResponseLowestPrice, int64);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnAuctionReceiptListSet, const TArray<FAuctionReceiptEntry>&);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnResponseReceipt, int64, bool);
 
 UCLASS()
 class J1_API UJ1GameInstance : public UGameInstance
@@ -55,12 +61,17 @@ public:
 	// ═════════════════════
 	//		 DELEGATE
 	// ═════════════════════
-	FOnChatReceived		OnChatReceived;
-	FOnLoginResult		OnLoginResult;
-	FOnNotice			OnNotice;
-	FOnCheckNickName	OnCheckNickName;
-	FOnLobbyListChange  OnLobbyListChange;
-	FOnLobbyListSet		OnLobbyListSet;
+	FOnChatReceived			OnChatReceived;
+	FOnLoginResult			OnLoginResult;
+	FOnNotice				OnNotice;
+	FOnCheckNickName		OnCheckNickName;
+	FOnLobbyListChange		OnLobbyListChange;
+	FOnLobbyListSet			OnLobbyListSet;
+	FOnAuctionListSet		OnAuctionListSet;
+	FOnResponseRegister		OnResponseRegister;
+	FOnResponseLowestPrice	OnResponseLowestPrice;
+	FOnAuctionReceiptListSet	OnAuctionReceiptListSet;	// TODO: 수령함 목록 응답 패킷 핸들러에서 Broadcast
+	FOnResponseReceipt		OnResponseReceipt;		// TODO: 수령 결과 응답 패킷 핸들러에서 Broadcast (ReceiptID, bSuccess)
 
 protected:
 	UPROPERTY()

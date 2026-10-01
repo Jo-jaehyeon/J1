@@ -53,7 +53,7 @@ void UJ1AuctionPurchaseWidget::SetEntry(const FAuctionEntry& InEntry)
 	{
 		Txt_UnitPrice->SetVisibility(ConsumableOnlyVisibility);
 		if (!bIsEquipment)							
-			Txt_UnitPrice->SetText(FText::AsNumber(Entry.GetPricePerUnit()));
+			Txt_UnitPrice->SetText(FText::AsNumber(Entry.UnitPrice));
 	}
 	if (Input_Quantity)		Input_Quantity->SetVisibility(ConsumableOnlyVisibility);
 	if (Btn_Max)			Btn_Max->SetVisibility(ConsumableOnlyVisibility);
@@ -105,7 +105,8 @@ void UJ1AuctionPurchaseWidget::UpdateEstimatedPrice()
 {
 	if (!Txt_EstimatedPrice)		return;
 	
-	const int64 EstimatedPrice = bIsEquipment ? Entry.TotalPrice : (Entry.GetPricePerUnit() * BuyQuantity);
+	// 소비 아이템은 입력한 구매 개수만큼 실시간으로 곱해서 보여준다.
+	const int64 EstimatedPrice = bIsEquipment ? Entry.GetTotalPrice() : Entry.UnitPrice * BuyQuantity;
 	Txt_EstimatedPrice->SetText(FText::AsNumber(EstimatedPrice));
 }
 

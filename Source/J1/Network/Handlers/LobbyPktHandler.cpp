@@ -40,6 +40,7 @@ bool Handle_RES_CHARACTER_LIST(SessionPtr& session, Game::RES_CHARACTER_LIST& pk
 			temp.UpperBodySkinRowID = idx.upperskinid();
 			temp.LowerBodySkinRowID = idx.lowerskinid();
 			temp.WeaponSkinRowID = idx.weaponskinid();
+			temp.Gold = idx.gold();
 
 			Inlist.Add(temp);
 		}

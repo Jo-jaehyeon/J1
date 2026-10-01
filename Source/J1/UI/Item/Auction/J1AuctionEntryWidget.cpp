@@ -6,23 +6,12 @@
 #include "Item/Fragments/J1ItemFragment_Equipable.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
-#include "Components/Button.h"
-
-void UJ1AuctionEntryWidget::NativeOnInitialized()
-{
-	Super::NativeOnInitialized();
-
-	if (Btn_Receipt)
-	{
-		Btn_Receipt->OnClicked.AddDynamic(this, &UJ1AuctionEntryWidget::HandleReceiptClicked);
-	}
-}
 
 FReply UJ1AuctionEntryWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
-	// 내 판매 목록 모드에서는 행 클릭으로 아무것도 하지 않음
-	if (bIsMyList)		return FReply::Unhandled(); 
-	
+	// 내 등록 물품 모드에서는 행 클릭으로 아무것도 하지 않음
+	if (bIsMyList)		return FReply::Unhandled();
+
 	if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
 	{
 		OnEntryClicked.Broadcast(EntryIndex);
@@ -57,19 +46,19 @@ void UJ1AuctionEntryWidget::InitEntry(int32 InEntryIndex, const FAuctionEntry& I
 
 	if (Txt_Quantity)
 	{
-		Txt_Quantity->SetVisibility(bIsEquipment ? ESlateVisibility::Collapsed : ESlateVisibility::Visible);
+		Txt_Quantity->SetVisibility(bIsEquipment ? ESlateVisibility::Hidden : ESlateVisibility::Visible);
 		Txt_Quantity->SetText(FText::Format(NSLOCTEXT("Auction", "EntryQuantity", "{0}개"), FText::AsNumber(Entry.Quantity)));
 	}
 	if (Txt_TotalPrice)
 	{
-		Txt_TotalPrice->SetText(FText::AsNumber(Entry.TotalPrice));
+		Txt_TotalPrice->SetText(FText::AsNumber(Entry.GetTotalPrice()));
 	}
 	if (Txt_PricePerUnit)
 	{
-		Txt_PricePerUnit->SetVisibility(bIsEquipment ? ESlateVisibility::Collapsed : ESlateVisibility::Visible);
+		Txt_PricePerUnit->SetVisibility(bIsEquipment ? ESlateVisibility::Hidden : ESlateVisibility::Visible);
 		if (!bIsEquipment)
 		{
-			Txt_PricePerUnit->SetText(FText::AsNumber(Entry.GetPricePerUnit()));
+			Txt_PricePerUnit->SetText(FText::AsNumber(Entry.UnitPrice));
 		}
 	}
 	if (Txt_RemainingTime)
@@ -77,20 +66,22 @@ void UJ1AuctionEntryWidget::InitEntry(int32 InEntryIndex, const FAuctionEntry& I
 		Txt_RemainingTime->SetText(FormatRemainingTime(Entry.ExpireAt));
 	}
 
-	// 수령 버튼은 내 판매 목록 모드 + 판매 완료일 때만 보인다. 그 외(경매장 엔트리 포함)엔 항상 숨김.
-	const bool bShowClaimButton = bIsMyList && Entry.bIsSold;
-	if (Btn_Receipt)
-	{
-		Btn_Receipt->SetVisibility(bShowClaimButton ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
-	}
-
-	// 경매장 엔트리(bIsMyListing=false)는 항상 "판매 안 됨" 기본 표현으로 통일.
-	OnSoldStateChanged(bIsMyList && Entry.bIsSold);
 	OnSelectionChanged(false);
 }
 
-FText UJ1AuctionEntryWidget::FormatRemainingTime(const FDateTime& ExpireAt)
+FText UJ1AuctionEntryWidget::FormatRemainingTime(const FString& ExpireAtString)
 {
+	// ExpireAtString은 MySQL DATETIME("YYYY-MM-DD HH:MM:SS")이 std::string -> FString으로 넘어온 값.
+	FString Iso8601String = ExpireAtString;
+	Iso8601String.ReplaceInline(TEXT(" "), TEXT("T"));
+
+	FDateTime ExpireAt;
+	if (!FDateTime::ParseIso8601(*Iso8601String, ExpireAt))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed to parse ExpireAt string: %s"), *ExpireAtString);
+		return FText::Format(NSLOCTEXT("Auction", "EntryRemainingTime", "{0}시간 {1}분"), FText::AsNumber(0), FText::AsNumber(0));
+	}
+
 	// 서버가 마감 시각을 KST(한국 시간) 기준으로 내려준다는 전제.
 	// 클라이언트 PC의 로컬 시간대 설정과 무관하게 항상 같은 결과가 나오도록 UtcNow() + 9시간으로 KST를 직접 계산한다.
 	static const FTimespan KstOffset = FTimespan::FromHours(9);
@@ -107,17 +98,9 @@ FText UJ1AuctionEntryWidget::FormatRemainingTime(const FDateTime& ExpireAt)
 
 void UJ1AuctionEntryWidget::SetSelected(bool bInClicked)
 {
-	// 내 판매 목록 모드에서는 선택 개념이 없음
-	if (bIsMyList)		return; 
-	
+	// 내 등록 물품 모드에서는 선택 개념이 없음
+	if (bIsMyList)		return;
+
 	bClicked = bInClicked;
 	OnSelectionChanged(bInClicked);
-}
-
-void UJ1AuctionEntryWidget::HandleReceiptClicked()
-{
-	// 버튼이 숨겨져 있어야 정상이지만 한 번 더 확인
-	if (!bIsMyList || !Entry.bIsSold)		return; 
-
-	OnReceiptClicked.Broadcast(Entry);
 }

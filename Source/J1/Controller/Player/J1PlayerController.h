@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "InputActionValue.h"
+#include "Types/J1AuctionDefine.h"
 #include "J1PlayerController.generated.h"
 
 /**
@@ -29,6 +30,10 @@ public:
 	UFUNCTION(BlueprintCallable) void EngagedLockOn();
 	UFUNCTION(BlueprintCallable) void DisengagedLockOn();
 
+
+	int GetPlayerId() { return player_id; }
+	void SetPlayerId(int _id) { player_id = _id; }
+	
 protected:
 	void MoveAct(const FInputActionValue& Value);
 	void OnMoveCompleted(const FInputActionValue& Value);
@@ -45,14 +50,17 @@ private:
 	//		경매장 관련
 	//----------------------
 	UFUNCTION() void OpenInventoryForAuction();
-	UFUNCTION() void ReceiptAuctionProceeds(FAuctionEntry Entry);
+	UFUNCTION() void RequestAuctionList(bool bmyList, FString searchName);
+	UFUNCTION() void RequestAuctionReceiptList();
+	UFUNCTION() void RequestAuctionReceipt(FAuctionReceiptEntry ReceiptEntry);
 	UFUNCTION() void ConfirmAuctionPurchase(FAuctionEntry Entry, int32 Quantity);
-	UFUNCTION() void SubmitAuctionRegister(UJ1InventoryManager* SourceInventory, int32 SourceSlotIndex, int64 PricePerUnit, int32 Quantity, int32 DurationHours);
+	UFUNCTION() void SubmitAuctionRegister(UJ1InventoryManager* SourceInventory, int32 SourceSlotIndex, int64 PricePerUnit, int32 Quantity, FString DurationHours);
 
-	void HandleAuctionListResponse(const TArray<FAuctionEntry>& Entries);
-	void HandleMyAuctionListResponse(const TArray<FAuctionEntry>& Entries);
+	void HandleAuctionListResponse(bool myList, const TArray<FAuctionEntry>& Entries);
 	void HandleRegisterResponse(bool bSuccess);
 	void HandleLowestPriceResponse(int64 LowestPrice);
+	void HandleReceiptListResponse(const TArray<FAuctionReceiptEntry>& Receipts);
+	void HandleReceiptResponse(int64 ReceiptID, bool bSuccess);
 
 	/*
 	*  Member Variable
@@ -98,5 +106,8 @@ public:
 private:
 	FInputModeGameOnly GameInputMode;
 	FInputModeGameAndUI UIInputMode;
+	int player_id = INDEX_NONE;
 
+	// 수령 요청을 보내고 응답을 기다리는 항목들. 성공 응답이 오면 여기서 꺼내 실제 지급한다 (확정 갱신).
+	TMap<int64, FAuctionReceiptEntry> PendingReceipts;
 };

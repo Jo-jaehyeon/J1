@@ -54,13 +54,22 @@ void UJ1AuctionWidget::RefreshMyList()
 	RequestAuctionList(true, FString());
 }
 
+void UJ1AuctionWidget::RefreshTotalList()
+{
+	RequestAuctionList(false, CurrentSearchText);
+}
+
 // ─────────────────────────
 //				     서버 요청&응답
 // ─────────────────────────
 void UJ1AuctionWidget::OnAuctionListReceived(const TArray<FAuctionEntry>& Entries)
 {
 	CurrentEntries = Entries; // 최대 AuctionEntriesPerBatch(100)개
-	CurrentPageIndex = 0;
+
+	// 새로 열기/검색은 요청 전에 이미 0페이지로 맞춰둔다.
+	// 구매 후 재조회일 때는 보던 페이지를 유지하고, 매물이 줄어 범위를 벗어나면 마지막 페이지로.
+	const int32 LastPage = FMath::Max(0, (CurrentEntries.Num() - 1) / AuctionEntriesPerPage);
+	CurrentPageIndex = FMath::Clamp(CurrentPageIndex, 0, LastPage);
 	SelectedEntryIndex = INDEX_NONE;
 
 	// EntryListPanel은 세 탭이 같이 쓰므로, 다른 탭을 보고 있을 땐 데이터만 저장하고 그리지 않는다.

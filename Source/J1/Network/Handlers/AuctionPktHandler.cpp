@@ -28,6 +28,35 @@ bool Handle_RES_AUCTION_LIST(SessionPtr& session, Game::RES_AUCTION_LIST& pkt)
 	return false;
 }
 
+bool Handle_RES_RECEIPT_LIST(SessionPtr& session, Game::RES_RECEIPT_LIST& pkt)
+{
+	TArray<FAuctionReceiptEntry> list;
+	for (auto index : pkt.receiptlist())
+	{
+		if (index.receipt_type() < static_cast<int64>(EAuctionReceiptType::SoldProceeds) ||
+			index.receipt_type() > static_cast<int64>(EAuctionReceiptType::PurchasedItem))
+			continue;
+
+		EAuctionReceiptType Type = static_cast<EAuctionReceiptType>(index.receipt_type());
+
+		list.Add(FAuctionReceiptEntry{
+			.ReceiptID = index.list_id(),
+			.ReceiptType = Type,
+			.GoldAmount = index.price(),
+			.ItemTemplateID = index.item_id(),
+			.Quantity = index.count()
+			});
+	}
+
+	AsyncTask(ENamedThreads::GameThread, [list, session]() {
+		if (auto* GI = Cast<UJ1GameInstance>(session->GetGameInstance()))
+		{
+			GI->OnAuctionReceiptListSet.Broadcast(list);
+		}
+		});
+	return false;
+}
+
 bool Handle_RES_REGIST_ITEM(SessionPtr& session, Game::RES_REGIST_ITEM& pkt)
 {
 	bool result = pkt.result();
@@ -43,5 +72,20 @@ bool Handle_RES_REGIST_ITEM(SessionPtr& session, Game::RES_REGIST_ITEM& pkt)
 
 bool Handle_RES_PURCHASE_ITEM(SessionPtr& session, Game::RES_PURCHASE_ITEM& pkt)
 {
-	return false;
+	bool result = pkt.result();
+	int64 usedGold = pkt.gold();
+
+	AsyncTask(ENamedThreads::GameThread, [result, usedGold, session]() {
+		if (auto* GI = Cast<UJ1GameInstance>(session->GetGameInstance()))
+		{
+			GI->OnResponsePurchase.Broadcast(result, usedGold);
+		}
+	});
+
+	return true;
+}
+
+bool Handle_RES_RECEIPT_ITEM(SessionPtr& session, Game::RES_RECEIPT_ITEM& pkt)
+{
+	return true;
 }

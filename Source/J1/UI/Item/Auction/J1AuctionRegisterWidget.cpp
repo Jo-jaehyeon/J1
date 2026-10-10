@@ -129,8 +129,8 @@ void UJ1AuctionRegisterWidget::HandleItemSelected(UJ1InventoryManager* InInvento
 	SelectedSlotIndex = SlotIndex;
 	SelectedItemMaxQuantity = IS.StackCount;
 
-	// 장비인지 소비 아이템인지 판정 (UseItem()과 동일한 기준: Equipable Fragment 존재 여부)
-	bSelectedItemIsEquipment = (ItemTemplate->FindFragmentByClass<UJ1ItemFragment_Equipable_Utility>() == nullptr);
+	// 장비인지 소비 아이템인지 판정 (경매장 목록/구매창과 동일한 기준: 스택 가능 여부)
+	bSelectedItemIsEquipment = !ItemTemplate->IsStackable();
 
 	if (Img_Icon && ItemTemplate->IconTexture)
 	{

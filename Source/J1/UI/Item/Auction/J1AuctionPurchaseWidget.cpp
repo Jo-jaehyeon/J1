@@ -29,7 +29,8 @@ void UJ1AuctionPurchaseWidget::SetEntry(const FAuctionEntry& InEntry)
 	if (Entry.ItemTemplateID > INDEX_NONE)
 	{
 		const UJ1ItemTemplate& ItemTemplate = UJ1ItemData::Get().FindItemTemplateByID(Entry.ItemTemplateID);
-		bIsEquipment = (ItemTemplate.FindFragmentByClass<UJ1ItemFragment_Equipable>() != nullptr);
+		// Utility(포션)도 Equipable을 상속하므로 Fragment로 판정하면 안 됨 -> 스택 가능 여부로 판정
+		bIsEquipment = !ItemTemplate.IsStackable();
 
 		if (Img_Icon && ItemTemplate.IconTexture)	Img_Icon->SetBrushFromTexture(ItemTemplate.IconTexture);
 		if (Txt_Name)								Txt_Name->SetText(ItemTemplate.DisplayName);
@@ -94,6 +95,22 @@ void UJ1AuctionPurchaseWidget::ClosePanel()
 	SetVisibility(ESlateVisibility::Collapsed);
 }
 
+void UJ1AuctionPurchaseWidget::HandlePurchaseResult(bool bSuccess)
+{
+	if (bSuccess)
+	{
+		// 경매장 메인 위젯의 자식이므로 RemoveFromParent가 아니라 Collapsed로 숨긴다.
+		ClosePanel();
+	}
+	else
+	{
+		// 실패 : 등록 버튼만 다시 활성화해서 재시도
+		if (Btn_Confirm)	Btn_Confirm->SetIsEnabled(true);
+		if (Btn_Cancel)		Btn_Cancel->SetIsEnabled(true);
+		OnPurchaseFailed();
+	}
+}
+
 void UJ1AuctionPurchaseWidget::RequestLowestPrice(int32 ItemTemplateID)
 {
 	// TODO: 실제 서버 요청으로 교체.
@@ -151,9 +168,7 @@ void UJ1AuctionPurchaseWidget::HandleConfirmClicked()
 
 	const int32 FinalQuantity = bIsEquipment ? 1 : BuyQuantity;
 
-	// TODO: 여기서 실제 구매 서버 호출을 하거나, OnPurchaseConfirmed 구독자가 처리하도록 위임.
 	OnPurchaseConfirmed.Broadcast(Entry, FinalQuantity);
-
 	ClosePanel();
 }
 

@@ -46,6 +46,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Auction")
 	void RefreshMyList();
 
+	// 구매 성공 등으로 전체 목록의 수량이 바뀌었을 때 외부에서 호출. (현재 검색어/페이지 유지)
+	UFUNCTION(BlueprintCallable, Category = "Auction")
+	void RefreshTotalList();
+
 	// 서버 응답(배열)이 도착했을 때 호출. 네트워크 콜백 완료 지점에서 이 함수를 불러주면 된다.
 	UFUNCTION(BlueprintCallable, Category = "Auction")	void OnAuctionListReceived(const TArray<FAuctionEntry>& Entries);
 	UFUNCTION(BlueprintCallable, Category = "Auction")	void OnMyAuctionListReceived(const TArray<FAuctionEntry>& Entries);

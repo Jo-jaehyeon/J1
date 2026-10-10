@@ -30,6 +30,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Auction")	void OnLowestPriceReceived(int64 LowestPrice);
 	UFUNCTION(BlueprintCallable, Category = "Auction")	void ClosePanel();
 
+public:
+	// 서버 응답이 도착했을 때 외부(네트워크 콜백 등)에서 호출.
+	UFUNCTION(BlueprintCallable, Category = "Auction")	void HandlePurchaseResult(bool bSuccess);
+
+protected:
+	UFUNCTION(BlueprintImplementableEvent, Category = "Auction")
+	void OnPurchaseFailed();
+
 private:
 	void RequestLowestPrice(int32 ItemTemplateID);
 	void UpdateEstimatedPrice();

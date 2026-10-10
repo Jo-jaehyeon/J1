@@ -53,11 +53,12 @@ private:
 	UFUNCTION() void RequestAuctionList(bool bmyList, FString searchName);
 	UFUNCTION() void RequestAuctionReceiptList();
 	UFUNCTION() void RequestAuctionReceipt(FAuctionReceiptEntry ReceiptEntry);
-	UFUNCTION() void ConfirmAuctionPurchase(FAuctionEntry Entry, int32 Quantity);
 	UFUNCTION() void SubmitAuctionRegister(UJ1InventoryManager* SourceInventory, int32 SourceSlotIndex, int64 PricePerUnit, int32 Quantity, FString DurationHours);
+	UFUNCTION() void ConfirmAuctionPurchase(FAuctionEntry Entry, int32 Quantity);
 
 	void HandleAuctionListResponse(bool myList, const TArray<FAuctionEntry>& Entries);
 	void HandleRegisterResponse(bool bSuccess);
+	void HandlePurchaseResponse(bool bSuccess, int64 usedGold);
 	void HandleLowestPriceResponse(int64 LowestPrice);
 	void HandleReceiptListResponse(const TArray<FAuctionReceiptEntry>& Receipts);
 	void HandleReceiptResponse(int64 ReceiptID, bool bSuccess);

@@ -40,6 +40,10 @@ public:
 		return (FragmentClass*)FindFragmentByClass(FragmentClass::StaticClass());
 	}
 
+	// 한 칸에 여러 개 쌓이는 아이템인지 (포션 등 소비 아이템).
+	// 경매장에서 수량/개당 가격을 보여줄지, 구매 수량을 고를 수 있는지의 기준. 장비는 false.
+	bool IsStackable() const { return MaxStackCount > 1; }
+
 public:
 	// 경매장/인벤토리 그리드에서 차지하는 칸 크기
 	UPROPERTY(EditDefaultsOnly)

@@ -18,6 +18,7 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(FOnLobbyListChange, bool, FLobbySlotInfo&);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnLobbyListSet, const TArray<FLobbySlotInfo>&);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnAuctionListSet, bool, const TArray<FAuctionEntry>&);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnResponseRegister, bool);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnResponsePurchase, bool, int64);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnResponseLowestPrice, int64);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnAuctionReceiptListSet, const TArray<FAuctionReceiptEntry>&);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnResponseReceipt, int64, bool);
@@ -69,8 +70,9 @@ public:
 	FOnLobbyListSet			OnLobbyListSet;
 	FOnAuctionListSet		OnAuctionListSet;
 	FOnResponseRegister		OnResponseRegister;
+	FOnResponsePurchase		OnResponsePurchase;
 	FOnResponseLowestPrice	OnResponseLowestPrice;
-	FOnAuctionReceiptListSet	OnAuctionReceiptListSet;	// TODO: 수령함 목록 응답 패킷 핸들러에서 Broadcast
+	FOnAuctionReceiptListSet	OnAuctionReceiptListSet;
 	FOnResponseReceipt		OnResponseReceipt;		// TODO: 수령 결과 응답 패킷 핸들러에서 Broadcast (ReceiptID, bSuccess)
 
 protected:

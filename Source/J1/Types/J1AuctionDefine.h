@@ -13,6 +13,7 @@ enum class EAuctionTab : uint8
 UENUM(BlueprintType)
 enum class EAuctionReceiptType : uint8
 {
+	INVALID,
 	SoldProceeds,   // 판매 완료 - 골드 수령
 	ReturnedItem,   // 기간 만료로 안 팔림 - 아이템 반환
 	PurchasedItem   // 구매 완료 - 아이템 수령

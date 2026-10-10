@@ -23,6 +23,7 @@ public:
 	// InventoryWidget->InitInventory(PlayerInventoryComponent);
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void InitInventory(UJ1InventoryManager* InInventory);
+	UFUNCTION() void HandleGoldChanged(int64 NewGold);
 
 protected:
 	// Columns/Rows에 맞춰 슬롯 위젯을 새로 만들고 그리드에 배치
@@ -32,7 +33,7 @@ protected:
 	UFUNCTION()	void HandleInventoryChanged();
 	UFUNCTION()	void HandleSlotChanged(int32 SlotIndex);
 	UFUNCTION() void HandleSlotClicked(UJ1InventoryManager* InInventory, int32 SlotIndex);
-	UFUNCTION() void HandleGoldChanged(int64 NewGold);
+
 
 public:
 	// 아이템 등록 UI 등, "인벤토리에서 아이템을 하나 골라야 하는" 외부 UI가 구독하는 진입점.

@@ -62,7 +62,7 @@ void AJ1Player::BeginPlay()
 	// temp : remove
 	UJ1ItemInstance* temp = NewObject<UJ1ItemInstance>();
 	temp->Init(1, EItemRarity::Common);
-	MyInventory->AddItem(temp, 10);
+	MyInventory->AddItem(temp, 100);
 }
 
 void AJ1Player::Tick(float DeltaTime)

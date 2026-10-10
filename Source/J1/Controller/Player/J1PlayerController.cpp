@@ -79,6 +79,7 @@ void AJ1PlayerController::BeginPlay()
 		SetPlayerId(GI->GetUserid());
 		GI->OnAuctionListSet.AddUObject(this, &AJ1PlayerController::HandleAuctionListResponse);
 		GI->OnResponseRegister.AddUObject(this, &AJ1PlayerController::HandleRegisterResponse);
+		GI->OnResponsePurchase.AddUObject(this, &AJ1PlayerController::HandlePurchaseResponse);
 		GI->OnResponseLowestPrice.AddUObject(this, &AJ1PlayerController::HandleLowestPriceResponse);
 		GI->OnAuctionReceiptListSet.AddUObject(this, &AJ1PlayerController::HandleReceiptListResponse);
 		GI->OnResponseReceipt.AddUObject(this, &AJ1PlayerController::HandleReceiptResponse);
@@ -312,16 +313,6 @@ void AJ1PlayerController::RequestAuctionReceipt(FAuctionReceiptEntry ReceiptEntr
 	// 응답 핸들러에서 GI->OnResponseReceipt.Broadcast(ReceiptID, bSuccess) 호출.
 }
 
-void AJ1PlayerController::ConfirmAuctionPurchase(FAuctionEntry Entry, int32 Quantity)
-{
-	UE_LOG(PlayerLog, Log, TEXT("Auction purchase requested. ListingID=%lld Quantity=%d"), Entry.ListID, Quantity);
-
-	// TODO: 실제 서버에 구매 요청 (REQ_PURCHASE_ITEM).
-	// 구매한 아이템은 즉시 인벤토리에 넣지 않는다. 서버가 골드 차감 + 재고 검증 후
-	// auction_receipts에 PurchasedItem 행을 만들고, 플레이어는 수령함 탭에서 받아간다.
-}
-
-
 void AJ1PlayerController::SubmitAuctionRegister(UJ1InventoryManager* SourceInventory, int32 SourceSlotIndex, int64 PricePerUnit, int32 Quantity, FString DurationHours)
 {
 	if (!SourceInventory)		return;
@@ -353,6 +344,23 @@ void AJ1PlayerController::SubmitAuctionRegister(UJ1InventoryManager* SourceInven
 	SEND_PACKET(GetGameInstance<UJ1GameInstance>(), ESessionType::Game, Game::PKT_REQ_REGIST_ITEM, registPkt);
 }
 
+void AJ1PlayerController::ConfirmAuctionPurchase(FAuctionEntry Entry, int32 Quantity)
+{
+	UE_LOG(PlayerLog, Log, TEXT("Auction purchase requested. ListingID=%lld Quantity=%d"), Entry.ListID, Quantity);
+	const FDateTime Now = FDateTime::Now();   // 로컬 시각 (KST)
+	UE_LOG(PlayerLog, Log, TEXT("[%s] Auction purchase start"),
+		*Now.ToString(TEXT("%Y-%m-%d %H:%M:%S.%s")));
+
+	Game::REQ_PURCHASE_ITEM purchasePkt;
+	Game::AuctionItemInfo* temp = purchasePkt.add_purchaseinfo();
+	temp->set_list_id(Entry.ListID);
+	temp->set_player_id(player_id);
+	temp->set_item_id(Entry.ItemTemplateID);
+	temp->set_count(Quantity);
+
+	SEND_PACKET(GetGameInstance<UJ1GameInstance>(), ESessionType::Game, Game::PKT_REQ_PURCHASE_ITEM, purchasePkt);
+}
+
 void AJ1PlayerController::HandleAuctionListResponse(bool myList, const TArray<FAuctionEntry>& Entries)
 {
 	if (AuctionWidget)
@@ -373,6 +381,37 @@ void AJ1PlayerController::HandleRegisterResponse(bool bSuccess)
 	if (bSuccess && AuctionWidget)
 	{
 		AuctionWidget->RefreshMyList();
+	}
+}
+
+void AJ1PlayerController::HandlePurchaseResponse(bool bSuccess, int64 usedGold)
+{
+	const FDateTime Now = FDateTime::Now();   // 로컬 시각 (KST)
+	UE_LOG(PlayerLog, Log, TEXT("[%s] Auction purchase end"),
+		*Now.ToString(TEXT("%Y-%m-%d %H:%M:%S.%s")));
+
+	// 골드는 구매 성공했을 때만 차감 (실패해도 서버가 계산된 총액을 gold에 담아 보내는 경우가 있음)
+	if (bSuccess)
+	{
+		if (AJ1Player* ControlledPlayer = Cast<AJ1Player>(GetCharacter()))
+		{
+			if (UJ1InventoryManager* Inventory = ControlledPlayer->GetInventory())
+			{
+				Inventory->AddGold(usedGold * -1);
+				if (InventoryWidget)	InventoryWidget->HandleGoldChanged(Inventory->GetGold());
+			}
+		}
+	}
+	
+	if (AuctionWidget && AuctionWidget->PurchaseWidget)
+	{
+		AuctionWidget->PurchaseWidget->HandlePurchaseResult(bSuccess);
+	}
+
+	// 구매 성공 시 전체 목록(남은 수량/매진) 갱신
+	if (bSuccess && AuctionWidget)
+	{
+		AuctionWidget->RefreshTotalList();
 	}
 }
 

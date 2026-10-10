@@ -32,7 +32,8 @@ void UJ1AuctionEntryWidget::InitEntry(int32 InEntryIndex, const FAuctionEntry& I
 	if (Entry.ItemTemplateID > INDEX_NONE)
 	{
 		const UJ1ItemTemplate& ItemTemplate = UJ1ItemData::Get().FindItemTemplateByID(Entry.ItemTemplateID);
-		bIsEquipment = (ItemTemplate.FindFragmentByClass<UJ1ItemFragment_Equipable>() != nullptr);
+		// Utility(포션)도 Equipable을 상속하므로 Fragment로 판정하면 안 됨 -> 스택 가능 여부로 판정
+		bIsEquipment = !ItemTemplate.IsStackable();
 
 		if (Img_Icon && ItemTemplate.IconTexture)
 		{

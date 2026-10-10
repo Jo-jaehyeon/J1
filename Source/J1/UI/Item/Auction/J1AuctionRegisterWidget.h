@@ -53,7 +53,7 @@ private:
 	UFUNCTION()	void HandleItemSelected(UJ1InventoryManager* InInventory, int32 SlotIndex);
 	UFUNCTION()	void HandleRegisterClicked();
 	UFUNCTION() void HandleCancelClicked();
-	UFUNCTION() void HandleDurationToggleChanged(bool bIsChecked);
+	UFUNCTION(BlueprintCallable, Category = "Auction") void HandleDurationToggleChanged(bool bIsChecked);
 	UFUNCTION() void HandleQuantityChanged(const FText& NewText);
 	UFUNCTION() void HandlePriceChanged(const FText& NewText);
 
